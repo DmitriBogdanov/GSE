@@ -1,0 +1,11 @@
+# Exclude dependencies from GitHub 'Languages' repository statistic
+include/firstparty/** linguist-vendored
+include/thirdparty/** linguist-vendored
+tests/firstparty/** linguist-vendored
+tests/thirdparty/** linguist-vendored
+
+include/GSE/detail/thirdparty/** linguist-vendored
+
+# Source diff format
+*.cpp   text diff=cpp
+*.hpp   text diff=cpp
