@@ -14,13 +14,15 @@ built on top of [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) l
 Entire library is header-only and can be found [here](include/).
 
 > [!Warning]
-> As of now, the libary is heavily work-in-progress, production usage is ill-advised.
+> As of now, the library is heavily work-in-progress, production usage is ill-advised.
 
-## Desing Principles
+## Design Principles
 
 - **Easy to include.** No build system is required by the library, adding it should be as simple as single `#include`. All dependencies are embedded.
 
-- **Total modularity.** All solvers are built in a completely modular way, allowing them to seamlessly work with any custom system / integrator / PRNG / distribution / etc. provided, this is very much unlike most Matlab & Julia solvers that tightly couple methods to a function & API.
+- **Easy to use.** Library provide an API similar to the ones used in Matlab/Julia/Numpy, but with proper type safety of C++.
+
+- **Total modularity.** All solvers are built in a completely modular way, allowing them to seamlessly work with any custom systems / integrators / PRNGs / distributions / etc. that are provided, this is very much unlike most Matlab & Julia solvers that tend to tightly couple integration methods to a function.
 
 ## Performance
 
@@ -29,8 +31,6 @@ This library is heavily focused on performance, this is achieved through followi
 - **Support of dynamic & compile-time dimensions.** Similarly to Eigen [fixed-size & dynamic vectors](https://eigen.tuxfamily.org/dox/group__TopicFixedSizeVectorizable.html), all methods are templated on an optionally dynamic size, this means problems where dimension is known at compile time can operate entirely on the stack with no dynamic allocations. This also opens up room for additional compiler optimizations such as SIMD / unrolling / omitted bound checking and etc.
 
 - **Type-safe passing of callables.** All callables in this library are passed as SFINA-restricted template parameters, this completely avoids overhead of type-erased delegates such as `std::function` and allows compiler to properly inline callables arguments inside the functions they were passed in.
-
-- **Allocation reuse.** This library makes heavy use of stateful functors to avoid vector & matrix reallocation that happens with most "naively" written math functions & integrators.
 
 ## Documentation
 
