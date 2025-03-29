@@ -1,7 +1,12 @@
-add_executable(run main.cpp)
 
-target_compile_features(run PRIVATE cxx_std_17)
-target_compile_options(run PRIVATE -O2 -Wall -Wextra -Wpedantic -Werror)
+# Macro for defining examples
+macro(add_example filename)
+    add_executable(${filename} ${filename}.cpp)
+    target_compile_features(${filename} PRIVATE cxx_std_17)
+    target_compile_options(${filename} PRIVATE -O2 -Wall -Wextra -Wpedantic)
+endmacro()
+
+add_example(example)
 
 
 

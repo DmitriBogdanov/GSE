@@ -2,15 +2,17 @@ cmake_minimum_required(VERSION 3.9.1)
 
 project(project_name)
 project(
-    XXXXXX
-    VERSION 2.0.0
-    DESCRIPTION "DESCRIPTION"
-    HOMEPAGE_URL "https://github.com/DmitriBogdanov/XXXXXX"
+    GSE
+    VERSION 1.0.1
+    DESCRIPTION "Generic ODE, SDE and algebraic solvers for Eigen."
+    HOMEPAGE_URL "https://github.com/DmitriBogdanov/GSE"
 )
 
-# Source
-include_directories(source)
-add_subdirectory(source)
+# Headers
+include_directories(include)
 
-# Tests
+# Executables
 add_subdirectory(tests)
+add_subdirectory(benchmarks)
+add_subdirectory(examples)
+

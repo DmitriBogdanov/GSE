@@ -10,13 +10,17 @@
 
 // _______________________ INCLUDES _______________________
 
-#include <cmath>     // isfinite()
+#include <cmath> // isfinite()
+#include <functional>
 #include <stdexcept> // runtime_error
 #include <string>    // to_string
 #include <type_traits>
 
 #include "alg.hpp"
+#include "butcher.hpp"
 #include "core.hpp"
+
+#include <iostream> // TEMP:
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -24,54 +28,60 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
+// ====================
+// --- ODE Defaults ---
+// ====================
+
+namespace gse::ode::defaults {
+    
+constexpr Scalar tau       = 1e-3;
+constexpr Scalar tau_min   = 1e-9;
+constexpr Scalar tau_max   = 1e-1;
+constexpr Scalar tolerance = 1e-12;
+constexpr Scalar fact      = 0.7;
+constexpr Scalar factmin   = 0.7;
+constexpr Scalar factmax   = 1.5;
+
+}
+
 // =======================
 // --- ODE Integrators ---
 // =======================
 
 namespace gse::ode::integrators {
 
-// --- Commonly used integration formulas ---
-// ------------------------------------------
+// --- Base Classes ---
+// --------------------
 
-template <Extent N, class Func>
-void _rk4_step(Vector<N>& k1, Vector<N>& k2, Vector<N>& k3, Vector<N>& k4, Vector<N>& tmp, // reusable storage
-               Scalar t, Vector<N>& y0, Func&& f, Scalar tau                               // problem
-) {
-    k1  = f(t, y0);
-    tmp = y0 + 0.5 * tau * k1;
-    k2  = f(t + 0.5 * tau, tmp);
-    tmp = y0 + 0.5 * tau * k2;
-    k3  = f(t + 0.5 * tau, tmp);
-    tmp = y0 + tau * k3;
-    k4  = f(t + tau, tmp);
+template <Extent N = dynamic_size>
+struct Base {
+    Scalar tau = defaults::tau; // time step
+};
 
-    y0 += tau / 6. * (k1 + 2. * k2 + 2. * k3 + k4);
+template <Extent N = dynamic_size>
+struct AdaptiveBase : Base<N> {
+    Scalar tau_min = defaults::tau_min; // hard min on 'tau' adaptation
+    Scalar tau_max = defaults::tau_max; // hard max on 'tau' adaptation
 
-    t += tau;
-}
+    Scalar tolerance = defaults::tolerance; // error tolerance
+    Scalar fact      = defaults::fact;      // usually 0.7 / 0.8 / 0.9, measure of our confidence in error estimate
+    Scalar factmin   = defaults::factmin;   // usually in [0.2, 0.7] range, limits how fast 'tau' can shrink
+    Scalar factmax   = defaults::factmax;   // usually in [1.5, 5.0] range, limits how fast 'tau' can grow
+};
 
-// --- Integrators ---
-// -------------------
-
-constexpr Scalar default_tau       = 1e-3;
-constexpr Scalar default_tau_min   = 1e-9;
-constexpr Scalar default_tau_max   = 1e-1;
-constexpr Scalar default_tolerance = std::numeric_limits<Scalar>::epsilon();
+// --- Usable Integrators ---
+// --------------------------
 
 // Euler
 // > Euler's explicit method
 // > Explicit, O(tau)
 template <Extent N = dynamic_size>
-struct Euler {
-    // - Params -
-    Scalar tau = default_tau;
+struct Euler : Base<N> {
 
-    // - Integrator -
     template <class Func>
-    void operator()(Scalar& t, Vector<N>& y0, Func&& f) {
-        y0 += tau * f(t, y0);
-
-        t += tau;
+    void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
+        y0 += this->tau * f(t, y0);
+        t += this->tau;
     }
 };
 
@@ -79,129 +89,122 @@ struct Euler {
 // > 4-th order Runge-Kutta method
 // > Explicit, O(tau^4)
 template <Extent N = dynamic_size>
-struct RK4 {
-    // - Params -
-    Scalar tau = default_tau;
+struct RK4 : Base<N> {
 
-    // - Integrator -
     template <class Func>
-    void operator()(Scalar& t, Vector<N>& y0, Func&& f) {
-        // k1 = f(t, y0);
-        // k2 = f(t + 0.5 * tau, y0 + 0.5 * tau * k1);
-        // k3 = f(t + 0.5 * tau, y0 + 0.5 * tau * k2);
-        // k4 = f(t + tau, y0 + tau * k3);
-
-        // y0 += tau / 6. * (k1 + 2. * k2 + 2. * k3 + k4);
-
-        _rk4_step(k1, k2, k3, k4, tmp, t, y0, f, tau);
-
-        t += tau;
+    void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
+        y0 = butcher::rk4::step(f, t, y0, this->tau);
+        t += this->tau;
     }
-
-private:
-    Vector<N> k1, k2, k3, k4;
-    Vector<N> tmp;
 };
 
 // AdamsRK4
 // > 4-th order Adams method with Runge-Kutta initialization
 // > Explicit, 4-step, O(tau^4)
 template <Extent N = dynamic_size>
-struct AdamsRK4 {
-    // - Params -
-    Scalar tau = default_tau;
+struct AdamsRK4 : Base<N> {
 
-    // - Integrator -
     template <class Func>
-    void operator()(Scalar& t, Vector<N>& y0, Func&& f) {
+    void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
         // First 4 iterations are obtained through RK4
-        if (iteration < 4) {
-            k1 = f(t, y0);
-            k2 = f(t + 0.5 * tau, y0 + 0.5 * tau * k1);
-            k3 = f(t + 0.5 * tau, y0 + 0.5 * tau * k2);
-            k4 = f(t + tau, y0 + tau * k3);
+        if (this->iteration < 4) {
+            y0 = butcher::rk4::step(f, t, y0, this->tau);
+            t += this->tau;
 
-            y0 += tau / 6. * (k1 + 2. * k2 + 2. * k3 + k4);
+            if (this->iteration == 0) this->fm4 = f(t, y0);
+            if (this->iteration == 1) this->fm3 = f(t, y0);
+            if (this->iteration == 2) this->fm2 = f(t, y0);
+            if (this->iteration == 3) this->fm1 = f(t, y0);
 
-            if (iteration == 0) fm4 = k1;
-            else if (iteration == 1) fm3 = k1;
-            else if (iteration == 2) fm2 = k1;
-            else if (iteration == 3) fm1 = k1;
-
-            ++iteration;
+            ++this->iteration;
         }
         // After that we switch to Adams4
         else {
-            fm4 = fm3;
-            fm3 = fm2;
-            fm2 = fm1;
-            fm1 = f(t, y0);
+            this->fm4 = this->fm3;
+            this->fm3 = this->fm2;
+            this->fm2 = this->fm1;
+            this->fm1 = f(t, y0);
 
-            y0 += tau / 24. * (55. * fm1 - 59. * fm2 + 37. * fm3 - 9. * fm4);
+            y0 += this->tau / 24. * (55. * this->fm1 - 59. * this->fm2 + 37. * this->fm3 - 9. * this->fm4);
+            t += this->tau;
         }
-
-        t += tau;
     }
 
 private:
     Uint      iteration = 0;
-    Vector<N> k1, k2, k3, k4;
     Vector<N> fm1, fm2, fm3, fm4;
 };
 
 // RK4RE
 // > 4-th order Runge-Kutta method with Richardson Extrapolation
-// > Explicit, O(tau^4)
+// > Explicit, adaptive, O(tau^5)
 template <Extent N = dynamic_size>
-struct RK4RE {
-    // - Params -
-    Scalar tau     = default_tau;
-    Scalar tau_min = default_tau_min; // hard min on 'tau' adaptaiton
-    Scalar tau_max = default_tau_max; // hard max on 'tau' adaptaiton
+struct RK4RE : AdaptiveBase<N> {
 
-    Scalar tolerance = default_tolerance; // error tolerance
-    Scalar fact      = 0.7;               // usually 0.7 / 0.8 / 0.9 / 0.95, measure of our confidence in extrapolation
-    Scalar factmin   = 0.7;               // usually in [0.2, 0.7] range, limits how fast 'tau' can shrink
-    Scalar factmax   = 1.5;               // usually in [1.5, 5.0] range, limits how fast 'tau' can grow
-
-    // - Integrator -
     template <class Func>
-    void operator()(Scalar& t, Vector<N>& y0, Func&& f) {
+    void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
 
         Scalar err{};
-
+        
+        Vector<N> w, y2;
+        
         do {
-            // One double-width step
-            w = y0;
-            _rk4_step(k1, k2, k3, k4, tmp, t, w, f, 2. * tau);
-
-            // Two single-width steps
-            y2 = y0;
-            _rk4_step(k1, k2, k3, k4, tmp, t, y2, f, tau);
-            _rk4_step(k1, k2, k3, k4, tmp, t + tau, y2, f, tau);
+            // One double-step
+            w = butcher::rk4::step(f, t, y0, 2 * this->tau);
+            
+            // Two regular steps
+            y2 = butcher::rk4::step(f, t, y0, this->tau);
+            y2 = butcher::rk4::step(f, t, y2, this->tau);
 
             // Error estimate
             Scalar err = 0; // = 1 / (2^p - 1) * max{...}
-            for (Idx i = 0; i < y0.size(); ++i) err = std::max(err, (y2[i] - w[i]) / std::abs(y2[i]));
+            for (Idx i = 0; i < y2.size(); ++i) err = std::max(err, std::abs(y2[i] - w[i]) / std::abs(y2[i]));
             err *= 1. / (16. - 1.);
-
+            
             // Step correction
-            const Scalar tau_growth_factor = fact * (tolerance / err);
-            tau *= std::clamp(tau_growth_factor, factmin, factmax);
-            tau = std::clamp(tau, tau_min, tau_max);
-        } while (err >= tolerance);
+            const Scalar tau_growth_factor = this->fact * (this->tolerance / err);
+            this->tau *= std::clamp(tau_growth_factor, this->factmin, this->factmax);
+            this->tau = std::clamp(this->tau, this->tau_min, this->tau_max);
+            
+        } while (err >= this->tolerance);
 
-        // y0 = y2;                          // regular step
-        // y0 = y2 + (y2 - w) / (2 * p - 1); // (p + 1)-order approximation using a theorem
-        y0 = y2 + (y2 - w) / (2. * 4 - 1);
-
-        t += 2 * tau;
+        y0 = y2 + (y2 - w) / (2. * 4 - 1); // (p + 1)-order approximation using a theorem
+        t += 2 * this->tau;
     }
+};
 
-private:
-    Vector<N> k1, k2, k3, k4;
-    Vector<N> tmp;
-    Vector<N> w, y2;
+// DOPRI45
+// > 4(5) Dormand-Prince (based on embedded 4/5-th order Runge-Kutta steps)
+// > Explicit, adaptive, O(tau^5)
+template <Extent N = dynamic_size>
+struct DOPRI45 : AdaptiveBase<N> {
+
+    template <class Func>
+    void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
+
+        Scalar err{};
+        
+        Vector<N> y, y_hat;
+
+        do {
+            // Embedded step
+            std::tie(y, y_hat) = butcher::dopri45::embedded_step(f, t, y0, this->tau);
+
+            // Error estimate
+            Scalar err = 0; // = 1 / (2^p - 1) * max{...}
+            for (Idx i = 0; i < y_hat.size(); ++i) err = std::max(err, std::abs(y_hat[i] - y[i]) / std::abs(y_hat[i]));
+            err *= 1. / (16. - 1.);
+            
+            // Step correction
+            const Scalar tau_growth_factor = this->fact * (this->tolerance / err);
+            this->tau *= std::clamp(tau_growth_factor, this->factmin, this->factmax);
+            this->tau = std::clamp(this->tau, this->tau_min, this->tau_max);
+            
+        } while (err >= this->tolerance);
+
+        y0 = y_hat;
+        t += this->tau;
+    }
 };
 
 } // namespace gse::ode::integrators
@@ -211,6 +214,11 @@ private:
 // ==================
 
 namespace gse::ode {
+
+// Type-erased functions
+using RHS        = std::function<Vector<>(Scalar, Vector<>)>;
+using Integrator = std::function<void(RHS f, Scalar& t, Vector<>& y0)>;
+using Callback   = std::function<void(Scalar t, Vector<> y0, Integrator f)>;
 
 // Required callable signatures:
 //    > Vector<N> f(Scalar t, const Vector<N>& y0)
@@ -226,7 +234,7 @@ template <Extent N,                                 //
           // Enforce function signatures
           _require_invocable_r<Vector<N>, Func, Scalar, Vector<N>>                  = true, //
           _require_invocable<Callback, Scalar, Vector<N>, std::decay_t<Integrator>> = true, //
-          _require_invocable<Integrator, Scalar&, Vector<N>&, std::decay_t<Func>>   = true  //
+          _require_invocable<Integrator, std::decay_t<Func>, Scalar&, Vector<N>&>   = true  //
 
           >
 void solve(Func&&       f,                         // system RHS
@@ -266,7 +274,7 @@ void solve(Func&&       f,                         // system RHS
     // Iterations 1...M (integration)
     while (t < t1) {
         t_prev = t;
-        integrator(t, y0, f);
+        integrator(f, t, y0);
         t_since_callback += t - t_prev;
 
         if (verify) test_solution_for_divergence();

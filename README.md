@@ -13,6 +13,9 @@ built on top of [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) l
 
 Entire library is header-only and can be found [here](include/).
 
+> [!Warning]
+> As of now, the libary is heavily work-in-progress, production usage is ill-advised.
+
 ## Desing Principles
 
 - **Easy to include.** No build system is required by the library, adding it should be as simple as single `#include`. All dependencies are embedded.

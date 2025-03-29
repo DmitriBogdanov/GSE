@@ -12,6 +12,8 @@
 
 #include <array>   // array<>
 #include <cstddef> // size_t
+#include <functional>
+#include <initializer_list>
 #include <type_traits>
 #include <vector>  // vector<>
 
@@ -59,6 +61,12 @@ constexpr Extent extent_rows = static_cast<Extent>(Mat::CompileTimeTraits::RowsA
 template <class Mat>
 constexpr Extent extent_cols = static_cast<Extent>(Mat::CompileTimeTraits::ColsAtCompileTime);
 
+Vector<> make_vector(std::initializer_list<Scalar> init_list) {
+    Vector<> res = Vector<>::Zero(init_list.size());
+    for (Idx i = 0; i < res.size(); ++i) res[i] = init_list.begin()[i];
+    return res;
+}
+
 // template<class T>
 // const std::decay_t<T>& raw_cref(T&& value) {
 //     return std::forward<T>(value);
@@ -101,6 +109,9 @@ inline const Eigen::IOFormat none(6, 0, " ", " ", "", "", "", "");
 
 template<bool Cond>
 using _require = std::enable_if_t<Cond, bool>;
+
+template<class T, class Signature>
+using _require_signature = _require<std::is_convertible_v<T, std::function<Signature>>>;
 
 template<class T, class... Args>
 using _require_invocable = _require<std::is_invocable_v<T, Args...>>;
