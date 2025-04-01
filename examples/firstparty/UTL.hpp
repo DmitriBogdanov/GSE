@@ -1449,7 +1449,7 @@ public:
         const auto chars = this->to_string(format);
 
         const std::filesystem::path path = filepath;
-        if (path.has_parent_path() && std::filesystem::exists(path.parent_path()))
+        if (path.has_parent_path() && !std::filesystem::exists(path.parent_path()))
             std::filesystem::create_directories(std::filesystem::path(filepath).parent_path());
         // no need to do an OS call in a trivial case, some systems might also have limited permissions
         // on directory creation and calling 'create_directories()' straight up will cause them to error
@@ -10449,8 +10449,9 @@ void _append_decorated_value(std::ostream& os, const T& value) {
             const std::string exponent = number_string.substr(e_index + 2);
 
             number_string.clear();
-            number_string += mantissa;
-            number_string += " \\cdot 10^{";
+            if (mantissa != "1.") number_string += mantissa;
+            if (mantissa != "1.") number_string += " \\cdot ";
+            number_string += "10^{";
             if (sign == '-') number_string += sign;
             number_string += _trim_left(exponent, '0');
             number_string += '}';

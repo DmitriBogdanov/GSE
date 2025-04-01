@@ -67,6 +67,9 @@ struct AdaptiveBase : Base<N> {
     Scalar fact      = defaults::fact;      // usually 0.7 / 0.8 / 0.9, measure of our confidence in error estimate
     Scalar factmin   = defaults::factmin;   // usually in [0.2, 0.7] range, limits how fast 'tau' can shrink
     Scalar factmax   = defaults::factmax;   // usually in [1.5, 5.0] range, limits how fast 'tau' can grow
+    
+    gse::Uint steps_taken     = 0;
+    gse::Uint steps_discarded = 0;
 };
 
 // --- Usable Integrators ---
@@ -143,12 +146,10 @@ struct RK4RE : AdaptiveBase<N> {
 
     template <class Func>
     void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
-
-        Scalar err{};
         
         Vector<N> w, y2;
         
-        do {
+        while (true) {
             // One double-step
             w = butcher::rk4::step(f, t, y0, 2 * this->tau);
             
@@ -162,12 +163,22 @@ struct RK4RE : AdaptiveBase<N> {
             err *= 1. / (16. - 1.);
             
             // Step correction
-            const Scalar tau_growth_factor = this->fact * (this->tolerance / err);
+            // tau *= clamp( fact * (tol / err)^[1 / (p-1)], factmin, factmax )
+            const Scalar tau_growth_factor = this->fact * std::pow(this->tolerance / err, 1. / (4. - 1.));
             this->tau *= std::clamp(tau_growth_factor, this->factmin, this->factmax);
             this->tau = std::clamp(this->tau, this->tau_min, this->tau_max);
             
-        } while (err >= this->tolerance);
-
+            // Record steps
+            if (err >= this->tolerance) {
+                ++this->steps_discarded;
+                continue;
+            } else {
+                ++this->steps_taken;
+                break;
+            }
+            
+        }
+        
         y0 = y2 + (y2 - w) / (2. * 4 - 1); // (p + 1)-order approximation using a theorem
         t += 2 * this->tau;
     }
@@ -182,25 +193,33 @@ struct DOPRI45 : AdaptiveBase<N> {
     template <class Func>
     void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
 
-        Scalar err{};
-        
         Vector<N> y, y_hat;
 
-        do {
+        while (true) {
             // Embedded step
             std::tie(y, y_hat) = butcher::dopri45::embedded_step(f, t, y0, this->tau);
 
             // Error estimate
             Scalar err = 0; // = 1 / (2^p - 1) * max{...}
             for (Idx i = 0; i < y_hat.size(); ++i) err = std::max(err, std::abs(y_hat[i] - y[i]) / std::abs(y_hat[i]));
-            err *= 1. / (16. - 1.);
+            err *= 1. / (32. - 1.);
             
             // Step correction
-            const Scalar tau_growth_factor = this->fact * (this->tolerance / err);
+            // tau *= clamp( fact * (tol / err)^[1 / (p-1)], factmin, factmax )
+            const Scalar tau_growth_factor = this->fact * std::pow(this->tolerance / err, 1. / (5. - 1.));
             this->tau *= std::clamp(tau_growth_factor, this->factmin, this->factmax);
             this->tau = std::clamp(this->tau, this->tau_min, this->tau_max);
             
-        } while (err >= this->tolerance);
+            // Record steps
+            if (err >= this->tolerance) {
+                ++this->steps_discarded;
+                continue;
+            } else {
+                ++this->steps_taken;
+                break;
+            }
+            
+        };
 
         y0 = y_hat;
         t += this->tau;

@@ -6,8 +6,8 @@ macro(add_example filename)
     target_compile_options(${filename} PRIVATE -O2 -Wall -Wextra -Wpedantic)
 endmacro()
 
-add_example(example)
-
+add_example(exponent)
+add_example(harmonic_oscillator)
 
 
 # _______________________ EXAMPLES _______________________
