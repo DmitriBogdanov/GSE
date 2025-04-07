@@ -9,57 +9,6 @@
 
 using namespace utl;
 
-// =============================================
-// --- Integrator with additional debug info ---
-// =============================================
-
-// DOPRI45Debug
-// > 4(5) Dormand-Prince (based on embedded 4/5-th order Runge-Kutta steps)
-// > Explicit, adaptive, O(tau^5)
-// template <gse::Extent N = gse::dynamic_size>
-// struct DOPRI45Debug : gse::ode::integrators::AdaptiveBase<N> {
-
-//     gse::Uint steps_total     = 0;
-//     gse::Uint steps_discarded = 0;
-
-//     template <class Func>
-//     void operator()(Func&& f, gse::Scalar& t, gse::Vector<N>& y0) {
-
-//         gse::Scalar err{};
-
-//         gse::Vector<N> y, y_hat;
-
-//         while (true) {
-//             // Embedded step
-//             std::tie(y, y_hat) = gse::butcher::dopri45::embedded_step(f, t, y0, this->tau);
-
-//             // Error estimate
-//             err = 0; // = 1 / (2^p - 1) * max{...}
-//             for (gse::Idx i = 0; i < y_hat.size(); ++i)
-//                 err = std::max(err, std::abs(y_hat[i] - y[i]) / std::abs(y_hat[i]));
-//             err *= 1. / (16. - 1.);
-
-//             // Step correction
-//             const gse::Scalar tau_growth_factor = this->fact * (this->tolerance / err);
-//             this->tau *= std::clamp(tau_growth_factor, this->factmin, this->factmax);
-//             this->tau = std::clamp(this->tau, this->tau_min, this->tau_max);
-
-//             // Record steps
-//             if (err >= this->tolerance) {
-//                 ++steps_total;
-//                 ++steps_discarded;
-//                 continue;
-//             } else {
-//                 ++steps_total;
-//                 break;
-//             }
-//         }
-
-//         y0 = y_hat;
-//         t += this->tau;
-//     }
-// };
-
 // ===================
 // --- ODE Problem ---
 // ===================
@@ -83,17 +32,13 @@ constexpr gse::Scalar t1 = t0 + 4.;
 const gse::Vector<2> y0 = analytical_solution(t0);
 } // namespace problem
 
-// =====================
-// --- Usage Example ---
-// =====================
+// =========================================
+// --- Integration with table formatting ---
+// =========================================
 
 // Note 1: To use dynamically sized vectors just switch 'gse::Vector<2>' to 'gse::Vector<>'
 // Note 2: Don't forget that dynamic Eigen vectors don't have an initializer-list constructor,
 //         unlike their static-sized equivalents
-
-
-
-
 
 template <class Integrator>
 void solve_with_integrator(Integrator&& integrator, const std::string& path) {
@@ -180,7 +125,7 @@ int main() {
         table::create({18, 18, 6, 9, 9, 12, 15, 10, 17});
         table::set_formats({table::SCIENTIFIC(1), table::SCIENTIFIC(1), table::FIXED(1), table::FIXED(1), table::FIXED(1),
                             table::DEFAULT(), table::DEFAULT(), table::FIXED(2), table::SCIENTIFIC(2)});
-        table::set_latex_mode(true);
+        table::set_latex_mode(false); // <- change this to export tables straight in LaTeX format
         table::cell("$tol$", "$\\tau_0$", "$fact$", "$factmin$", "$factmax$", "Steps", "Steps discarded", "Time (ms)", "Global Error");
         table::hline();
     };

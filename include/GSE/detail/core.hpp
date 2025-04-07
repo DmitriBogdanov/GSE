@@ -10,14 +10,14 @@
 
 // _______________________ INCLUDES _______________________
 
-#include <array>   // array<>
-#include <cstddef> // size_t
-#include <functional>
-#include <initializer_list>
-#include <type_traits>
-#include <vector>  // vector<>
+#include <array>            // array<>
+#include <cstddef>          // size_t
+#include <functional>       // function
+#include <initializer_list> // initializer_list<>
+#include <type_traits>      // is_invocable<>, is_invocable_r<>, is_convertible<>
+#include <vector>           // vector<>
 
-#include "thirdparty/Eigen/Dense"
+#include "thirdparty/Eigen/Dense" // Matrix, Vector, Dynamic
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -81,19 +81,55 @@ Vector<> make_vector(std::initializer_list<Scalar> init_list) {
 // --- Formatting ---
 // ==================
 
+// Convert 'Vector<N>' to std-containers
 template <Extent N>
 auto to_std(const Vector<N>& vec) {
-    // Size is dynamic => convert to 'std::vector'
+    // Size is dynamic => convert to 'std::vector<>'
     if constexpr (N == dynamic_size) {
         return std::vector<Scalar>(vec.data(), vec.data() + vec.size());
     }
-    // Size is static  => convert to 'std::array'
+    // Size is static  => convert to 'std::array<>'
     else {
         std::array<Scalar, N> res;
         for (std::size_t i = 0; i < N; ++i) res[i] = vec[i];
         return res;
     }
-} // converts 'Vector<N>' to std-containers
+} 
+
+// Convert 'Matrix<N, M>' to std-containers
+template <Extent N, Extent M>
+auto to_std(const Matrix<N, M>& mat) {
+    // Lambda to summarize fill loop that would be 4x duplicated otherwise
+    const auto fill = [&](auto& std_mat) {
+        for (Idx i = 0; i < mat.rows(); ++i)
+            for (Idx j = 0; j < mat.cols(); ++j) std_mat[i][j] = mat(i, j);
+
+        return std_mat;
+    };
+
+    // Size is { dynamic, dynamic } => convert to 'std::vector<std::vector<>>'
+    if constexpr (N == dynamic_size && M == dynamic_size) {
+        std::vector<std::vector<Scalar>> res(mat.rows());
+        for (Idx i = 0; i < mat.rows(); ++i) res[i].resize(mat.cols());
+        return fill(mat);
+    }
+    // Size is { dynamic, static } => convert to 'std::vector<std::array<>>'
+    else if constexpr (N == dynamic_size) {
+        std::vector<std::array<Scalar, M>> res(mat.rows());
+        return fill(mat);
+    }
+    // Size is { static, dynamic } => convert to 'std::array<std::vector<>>'
+    else if constexpr (M == dynamic_size) {
+        std::array<std::vector<Scalar>, N> res;
+        for (Idx i = 0; i < mat.rows(); ++i) res[i].resize(mat.cols());
+        return fill(mat);
+    }
+    // Size is { static, static } => convert to 'std::array<std::array>'
+    else {
+        std::array<std::array<Scalar, M>, N> res;
+        return fill(mat);
+    }
+}
 
 namespace format {
 
@@ -107,19 +143,19 @@ inline const Eigen::IOFormat none(6, 0, " ", " ", "", "", "", "");
 // --- Type traits ---
 // ===================
 
-template<bool Cond>
+template <bool Cond>
 using _require = std::enable_if_t<Cond, bool>;
 
-template<class T, class Signature>
+template <class T, class Signature>
 using _require_signature = _require<std::is_convertible_v<T, std::function<Signature>>>;
 
-template<class T, class... Args>
+template <class T, class... Args>
 using _require_invocable = _require<std::is_invocable_v<T, Args...>>;
 
-template<class T, class... Args>
+template <class T, class... Args>
 using _require_not_invocable = _require<!std::is_invocable_v<T, Args...>>;
 
-template<class Ret, class T, class... Args>
+template <class Ret, class T, class... Args>
 using _require_invocable_r = _require<std::is_invocable_r_v<Ret, T, Args...>>;
 
 } // namespace gse

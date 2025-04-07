@@ -10,21 +10,26 @@
 
 // _______________________ INCLUDES _______________________
 
-#include <cmath> // isfinite()
-#include <functional>
+#include <cmath>     // isfinite()
 #include <stdexcept> // runtime_error
 #include <string>    // to_string
-#include <type_traits>
 
 #include "alg.hpp"
 #include "butcher.hpp"
 #include "core.hpp"
 
-#include <iostream> // TEMP:
-
 // ____________________ DEVELOPER DOCS ____________________
 
-// TODO: DOCS
+// ODE (Ordinary Differential Equation) params, integrators and a solver-function.
+//
+// Some signatures may seem unwieldy with all the templates, but such is the price of being generic, in the
+// end we get a very nice, flexible and completely modular API with no unnecessary overhead baked into it.
+// All the convenience of Matlab-like API with full flexibility intact.
+//
+// The key idea is to separate integrator and it parameters into a functor, which allows 'solve()' to accept
+// any kind of integrator and treat it like a black box that simply advances the solution, the users will be
+// able to get 't', 'y' and whatever integrator state they need by simply providing a callback lambda that
+// takes integrator as a 'const auto&'.
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -33,7 +38,7 @@
 // ====================
 
 namespace gse::ode::defaults {
-    
+
 constexpr Scalar tau       = 1e-3;
 constexpr Scalar tau_min   = 1e-9;
 constexpr Scalar tau_max   = 1e-1;
@@ -42,7 +47,7 @@ constexpr Scalar fact      = 0.7;
 constexpr Scalar factmin   = 0.7;
 constexpr Scalar factmax   = 1.5;
 
-}
+} // namespace gse::ode::defaults
 
 // =======================
 // --- ODE Integrators ---
@@ -67,7 +72,8 @@ struct AdaptiveBase : Base<N> {
     Scalar fact      = defaults::fact;      // usually 0.7 / 0.8 / 0.9, measure of our confidence in error estimate
     Scalar factmin   = defaults::factmin;   // usually in [0.2, 0.7] range, limits how fast 'tau' can shrink
     Scalar factmax   = defaults::factmax;   // usually in [1.5, 5.0] range, limits how fast 'tau' can grow
-    
+
+    Scalar    err             = 0;
     gse::Uint steps_taken     = 0;
     gse::Uint steps_discarded = 0;
 };
@@ -146,39 +152,39 @@ struct RK4RE : AdaptiveBase<N> {
 
     template <class Func>
     void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
-        
+
         Vector<N> w, y2;
-        
+
         while (true) {
             // One double-step
             w = butcher::rk4::step(f, t, y0, 2 * this->tau);
-            
+
             // Two regular steps
             y2 = butcher::rk4::step(f, t, y0, this->tau);
             y2 = butcher::rk4::step(f, t, y2, this->tau);
 
             // Error estimate
-            Scalar err = 0; // = 1 / (2^p - 1) * max{...}
-            for (Idx i = 0; i < y2.size(); ++i) err = std::max(err, std::abs(y2[i] - w[i]) / std::abs(y2[i]));
-            err *= 1. / (16. - 1.);
-            
+            this->err = 0; // = 1 / (2^p - 1) * max{...}
+            for (Idx i = 0; i < y2.size(); ++i)
+                this->err = std::max(this->err, std::abs(y2[i] - w[i]) / std::abs(y2[i]));
+            this->err *= 1. / (16. - 1.);
+
             // Step correction
             // tau *= clamp( fact * (tol / err)^[1 / (p-1)], factmin, factmax )
-            const Scalar tau_growth_factor = this->fact * std::pow(this->tolerance / err, 1. / (4. - 1.));
+            const Scalar tau_growth_factor = this->fact * std::pow(this->tolerance / this->err, 1. / (4. - 1.));
             this->tau *= std::clamp(tau_growth_factor, this->factmin, this->factmax);
             this->tau = std::clamp(this->tau, this->tau_min, this->tau_max);
-            
+
             // Record steps
-            if (err >= this->tolerance) {
+            if (this->err >= this->tolerance) {
                 ++this->steps_discarded;
                 continue;
             } else {
                 ++this->steps_taken;
                 break;
             }
-            
         }
-        
+
         y0 = y2 + (y2 - w) / (2. * 4 - 1); // (p + 1)-order approximation using a theorem
         t += 2 * this->tau;
     }
@@ -200,25 +206,25 @@ struct DOPRI45 : AdaptiveBase<N> {
             std::tie(y, y_hat) = butcher::dopri45::embedded_step(f, t, y0, this->tau);
 
             // Error estimate
-            Scalar err = 0; // = 1 / (2^p - 1) * max{...}
-            for (Idx i = 0; i < y_hat.size(); ++i) err = std::max(err, std::abs(y_hat[i] - y[i]) / std::abs(y_hat[i]));
-            err *= 1. / (32. - 1.);
-            
+            this->err = 0; // = 1 / (2^p - 1) * max{...}
+            for (Idx i = 0; i < y_hat.size(); ++i)
+                this->err = std::max(this->err, std::abs(y_hat[i] - y[i]) / std::abs(y_hat[i]));
+            this->err *= 1. / (32. - 1.);
+
             // Step correction
             // tau *= clamp( fact * (tol / err)^[1 / (p-1)], factmin, factmax )
-            const Scalar tau_growth_factor = this->fact * std::pow(this->tolerance / err, 1. / (5. - 1.));
+            const Scalar tau_growth_factor = this->fact * std::pow(this->tolerance / this->err, 1. / (5. - 1.));
             this->tau *= std::clamp(tau_growth_factor, this->factmin, this->factmax);
             this->tau = std::clamp(this->tau, this->tau_min, this->tau_max);
-            
+
             // Record steps
-            if (err >= this->tolerance) {
+            if (this->err >= this->tolerance) {
                 ++this->steps_discarded;
                 continue;
             } else {
                 ++this->steps_taken;
                 break;
             }
-            
         };
 
         y0 = y_hat;

@@ -14,15 +14,28 @@
 #include <random>    // mt19937, normal_distribution<>
 #include <stdexcept> // runtime_error
 #include <string>    // to_string
-#include <type_traits>
 
 #include "core.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// TODO: DOCS
+// SDE (Stochastic Differential Equation) params, integrators and a solver-function.
+//
+// Some signatures may seem unwieldy with all the templates, but such is the price of being generic, in the
+// end we get a very nice, flexible and completely modular API with no unnecessary overhead baked into it.
+// All the convenience of Matlab-like API with full flexibility intact.
 
 // ____________________ IMPLEMENTATION ____________________
+
+// ====================
+// --- SDE Defaults ---
+// ====================
+
+namespace gse::sde::defaults {
+
+constexpr Scalar tau = 1e-3;
+
+} // namespace gse::sde::defaults
 
 // =======================
 // --- SDE Integrators ---
@@ -30,32 +43,55 @@
 
 namespace gse::sde::integrators {
 
-// --- Integrators ---
-// -------------------
+// --- Base Classes ---
+// --------------------
 
-constexpr Scalar default_tau = 1e-3;
+template <Extent N = dynamic_size>
+struct Base {
+    Scalar tau = defaults::tau; // time step
+};
+
+// --- Usable Integrators ---
+// --------------------------
 
 // EulerMaruyama
 // > Euler-Maruyama explicit method
 // > Explicit, weak convergence O(tau), strong convergence O(tau^1/2)
 template <Extent N = dynamic_size>
-struct EulerMaruyama {
-    // - Params -
-    Scalar tau = default_tau;
+struct EulerMaruyama : Base<N> {
 
-    // - Integrator -
     template <class Func, class Gen, class Dist>
-    void operator()(Scalar& t, Vector<N>& y0, Func&& A, Func&& B, Gen& gen, Dist& dist) {
+    void operator()(Func&& A, Func&& B, Gen& gen, Dist& dist, Scalar& t, Vector<N>& y0) {
+        Vector<N> dW;
         for (auto& e : dW) e = dist(gen);
-        dW *= std::sqrt(tau);
+        dW *= std::sqrt(this->tau);
 
-        y0 += tau * A(t, y0) + dW.cwiseProduct(B(t, y0));
-
-        t += tau;
+        y0 += this->tau * A(t, y0) + dW.cwiseProduct(B(t, y0));
+        t += this->tau;
     }
+};
 
-private:
-    Vector<N> dW;
+// ModifiedMilstein
+// > Milstein explicit method, modification from
+//   [P.E. Kloeden, E. Platen] Numerical solution of stochastic differential equations (page 374)
+// > Explicit, weak convergence O(tau), strong convergence O(tau)
+template <Extent N = dynamic_size>
+struct ModifiedMilstein : Base<N> {
+
+    template <class Func, class Gen, class Dist>
+    void operator()(Func&& A, Func&& B, Gen& gen, Dist& dist, Scalar& t, Vector<N>& y0) {
+        const Scalar sqrt_of_tau = std::sqrt(this->tau);
+
+        Vector<N> dW;
+        for (auto& e : dW) e = dist(gen);
+        dW *= sqrt_of_tau;
+
+        const Vector<N> Y = y0 + this->tau * A(t, y0) + sqrt_of_tau * B(t, y0);
+
+        y0 += this->tau * A(t, y0) + dW.cwiseProduct(B(t, y0)) +
+              0.5 * (B(t, Y) - B(t, y0)).cwiseProduct(dW.square() - this->tau) / sqrt_of_tau;
+        t += this->tau;
+    }
 };
 
 } // namespace gse::sde::integrators
@@ -89,17 +125,17 @@ template <Extent N,                                            //
                              std::decay_t<Gen>, std::decay_t<Dist>>                 = true //
 
           >
-void solve(FuncA&&      A,                         // deterministic part of system RHS
-           FuncB&&      B,                         // stochastic part of system RHS
+void solve(FuncA&&      A,                         // system RHS (deterministic part)
+           FuncB&&      B,                         // system RHS (stochastic part)
            Vector<N>    y0,                        // initial condition
            Scalar       t0,                        // time interval start
            Scalar       t1,                        // time interval end
            Callback&&   callback,                  // callback to export the result
            Scalar       callback_frequency,        // how often to call 'callback'
-           Integrator&& integrator = Integrator{}, // method
+           Integrator&& integrator = Integrator{}, // integration method
            bool         verify     = true,         // whether to test for divergence
            Gen&&        gen        = Gen{},        // underlying PRNG
-           Dist&&       dist       = Dist{}        // distribution object
+           Dist&&       dist       = Dist{}        // underlying normal distribution
 ) {
     Scalar t                = t0;
     Scalar t_prev           = 0;
@@ -129,7 +165,7 @@ void solve(FuncA&&      A,                         // deterministic part of syst
     // Iterations 1...M (integration)
     while (t < t1) {
         t_prev = t;
-        integrator(t, y0, A, B, gen, dist);
+        integrator(A, B, gen, dist, t, y0);
         t_since_callback += t - t_prev;
 
         if (verify) test_solution_for_divergence();
