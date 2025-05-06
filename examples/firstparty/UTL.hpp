@@ -2389,7 +2389,7 @@ void _assign_node_to_value_recursively(std::array<T, N>& value, const Node& node
     constexpr bool utl::json::_is_reflected_struct<struct_name_> = true;                                               \
                                                                                                                        \
     template <>                                                                                                        \
-    utl::json::Node utl::json::from_struct<struct_name_>(const struct_name_& val) {                                    \
+    inline utl::json::Node utl::json::from_struct<struct_name_>(const struct_name_& val) {                             \
         utl::json::Node json;                                                                                          \
         /* map 'json["<FIELDNAME>"] = val.<FIELDNAME>;' */                                                             \
         utl_json_map(utl_json_from_struct_assign, __VA_ARGS__);                                                        \
@@ -2397,7 +2397,7 @@ void _assign_node_to_value_recursively(std::array<T, N>& value, const Node& node
     }                                                                                                                  \
                                                                                                                        \
     template <>                                                                                                        \
-    auto utl::json::Node::to_struct<struct_name_>() const->struct_name_ {                                              \
+    inline auto utl::json::Node::to_struct<struct_name_>() const->struct_name_ {                                       \
         struct_name_ val;                                                                                              \
         /* map 'val.<FIELDNAME> = this->at("<FIELDNAME>").get<decltype(val.<FIELDNAME>)>();' */                        \
         utl_json_map(utl_json_to_struct_assign, __VA_ARGS__);                                                          \
@@ -6855,7 +6855,7 @@ struct Range {
 
     template <class Container>
     Range(Container& container) : Range(container.begin(), container.end()) {}
-};// requires random-access iterator, but no good way to express that before C++20 concepts
+}; // requires random-access iterator, but no good way to express that before C++20 concepts
 
 // User-defined deduction guides
 //
@@ -7364,16 +7364,16 @@ constexpr bool debug =
     buffer += "Architecture:      ";
     buffer += architecture_name;
     buffer += '\n';
-    
-    #ifdef __cpp_lib_hardware_interference_size
+
+#ifdef __cpp_lib_hardware_interference_size
     buffer += "L1 cache line (D):  ";
     buffer += std::to_string(std::hardware_destructive_interference_size);
     buffer += '\n';
-    
+
     buffer += "L1 cache line (C):  ";
     buffer += std::to_string(std::hardware_constructive_interference_size);
     buffer += '\n';
-    #endif // not (currently) implemented in GCC / clang despite being a C++17 feature
+#endif // not (currently) implemented in GCC / clang despite being a C++17 feature
 
     buffer += "Compiled in DEBUG: ";
     buffer += debug ? "true" : "false";
@@ -7638,10 +7638,10 @@ inline std::string _format_call_site(std::string_view file, int line, std::strin
 using clock = std::chrono::steady_clock;
 #else
 struct clock {
-    using rep                   = unsigned long long int;
-    using period                = std::ratio<1, UTL_PROFILER_OPTION_USE_x86_INTRINSICS_FOR_FREQUENCY>;
-    using duration              = std::chrono::duration<rep, period>;
-    using time_point            = std::chrono::time_point<clock>;
+    using rep = unsigned long long int;
+    using period = std::ratio<1, UTL_PROFILER_OPTION_USE_x86_INTRINSICS_FOR_FREQUENCY>;
+    using duration = std::chrono::duration<rep, period>;
+    using time_point = std::chrono::time_point<clock>;
     static const bool is_steady = true;
 
     static time_point now() noexcept {
@@ -9252,14 +9252,14 @@ struct UniformIntDistribution {
     [[nodiscard]] constexpr result_type min() const noexcept { return this->pars.min; }
     [[nodiscard]] constexpr result_type max() const noexcept { return this->pars.max; }
 
+    constexpr bool operator==(const UniformIntDistribution& other) noexcept {
+        return this->a() == other.a() && this->b() == other.b();
+    }
+    constexpr bool operator!=(const UniformIntDistribution& other) noexcept { return !(*this == other); }
+
 private:
     param_type pars{};
 };
-
-template <class T>
-constexpr bool operator==(const UniformIntDistribution<T>& lhs, const UniformIntDistribution<T>& rhs) noexcept {
-    return lhs.a() == rhs.a() && lhs.b() == rhs.b();
-}
 
 // --- Uniform real distribution ---
 // ---------------------------------
@@ -9411,12 +9411,227 @@ struct UniformRealDistribution {
     constexpr result_type b() const noexcept { return this->pars.max; }
     constexpr result_type min() const noexcept { return this->pars.min; }
     constexpr result_type max() const noexcept { return this->pars.max; }
+
+    constexpr bool operator==(const UniformRealDistribution& other) noexcept {
+        return this->a() == other.a() && this->b() == other.b();
+    }
+    constexpr bool operator!=(const UniformRealDistribution& other) noexcept { return !(*this == other); }
 };
 
+// --- Normal distribution ---
+// ---------------------------
+
+template <class T = double, _require<std::is_floating_point_v<T>> = true>
+struct NormalDistribution {
+    using result_type = T;
+
+    struct param_type {
+        result_type mean   = 0;
+        result_type stddev = 1;
+    } pars{};
+
+private:
+    // Marsaglia Polar algorithm generates values in pairs so we need to cache the 2nd one
+    result_type saved           = 0;
+    bool        saved_available = false;
+
+    // Implementation of Marsaglia Polar method for N(0, 1) based on libstdc++,
+    // the algorithm is exactly the same, except we use a faster uniform distribution
+    // ('generate_canonical()' that was implemented earlier)
+    //
+    // Note 1:
+    // While our 'generate_canonical()' is slightly different in that in produces [0, 1] range
+    // instead of [0, 1), this is not an issue since Marsaglia Polar is a rejection method and does
+    // not care about the inclusion of upper-boundaries, they get rejected by 'r2 > T(1)' check
+    //
+    // Note 2:
+    // As far as normal distributions go we have 3 options:
+    //    - Box-Muller
+    //    - Marsaglia Polar
+    //    - Ziggurat
+    // Box-Muller performance is similar to Marsaglia Polar, but it has issues working with [0, 1]
+    // 'generate_canonical()'. Ziggurat is usually ~50% faster, but involver several KB of lookup tables
+    // and a MUCH more cumbersome and difficult to generalize implementation. Most (in fact, all I've seen so far)
+    // ziggurat implementations found online are absolutely atrocious. There is a very interesting and well-made
+    // paper by Christopher McFarland (2015, see https://pmc.ncbi.nlm.nih.gov/articles/PMC4812161/ for pdf) than
+    // proposes several significant improvements, but it has even more lookup tables (~12 KB in total) and an even
+    // harder implementation. For the sake of robustness we will stick to Polar method for now.
+    //
+    // Note 3:
+    // Not 'constexpr' due to the <cmath> nonsense, can't do anything about it, will be fixed with C++23.
+    //
+    template <class Gen>
+    result_type generate_standard_normal(Gen& gen) noexcept {
+        if (this->saved_available) {
+            this->saved_available = false;
+            return this->saved;
+        }
+
+        result_type x, y, r2;
+
+        do {
+            x  = T(2) * generate_canonical<result_type>(gen) - T(1);
+            y  = T(2) * generate_canonical<result_type>(gen) - T(1);
+            r2 = x * x + y * y;
+        } while (r2 > T(1) || r2 == T(0));
+
+        const result_type mult = std::sqrt(-2 * std::log(r2) / r2);
+
+        this->saved_available = true;
+        this->saved           = x * mult;
+
+        return y * mult;
+    }
+
+public:
+    constexpr NormalDistribution() = default;
+    constexpr NormalDistribution(T mean, T stddev) noexcept : pars({mean, stddev}) { assert(stddev >= T(0)); }
+    constexpr NormalDistribution(const param_type& p) noexcept : pars(p) { assert(p.stddev >= T(0)); }
+
+    template <class Gen>
+    result_type operator()(Gen& gen) noexcept {
+        return this->generate_standard_normal(gen) * this->pars.stddev + this->pars.mean;
+    }
+
+    template <class Gen>
+    result_type operator()(Gen& gen, const param_type& params) noexcept {
+        assert(params.stddev >= T(0));
+        return this->generate_standard_normal(gen) * params.stddev + params.mean;
+    }
+
+    constexpr void reset() const noexcept {
+        this->saved           = 0;
+        this->saved_available = false;
+    }
+    [[nodiscard]] constexpr param_type  param() const noexcept { return this->pars; }
+    constexpr void                      param(const param_type& p) noexcept { *this = NormalDistribution(p); }
+    [[nodiscard]] constexpr result_type mean() const noexcept { return this->pars.mean; }
+    [[nodiscard]] constexpr result_type stddev() const noexcept { return this->pars.stddev; }
+    [[nodiscard]] constexpr result_type min() const noexcept { return std::numeric_limits<result_type>::lowest(); }
+    [[nodiscard]] constexpr result_type max() const noexcept { return std::numeric_limits<result_type>::max(); }
+
+    constexpr bool operator==(const NormalDistribution& other) noexcept {
+        return this->mean() == other.mean() && this->stddev() == other.stddev() &&
+               this->saved_available == other.saved_available && this->saved == other.saved;
+    }
+    constexpr bool operator!=(const NormalDistribution& other) noexcept { return !(*this == other); }
+};
+
+// --- Approximate normal distribution ---
+// ---------------------------------------
+
+// Extremely fast, but noticeably imprecise normal distribution, can be very useful for fuzzing & gamedev=
+
+template <class T, _require<std::is_integral_v<T> && std::is_unsigned_v<T>> = true>
+[[nodiscard]] constexpr int _popcount(T x) noexcept {
+    constexpr auto bitmask_1 = T(0x5555555555555555UL);
+    constexpr auto bitmask_2 = T(0x3333333333333333UL);
+    constexpr auto bitmask_3 = T(0x0F0F0F0F0F0F0F0FUL);
+
+    constexpr auto bitmask_16 = T(0x00FF00FF00FF00FFUL);
+    constexpr auto bitmask_32 = T(0x0000FFFF0000FFFFUL);
+    constexpr auto bitmask_64 = T(0x00000000FFFFFFFFUL);
+
+    x = (x & bitmask_1) + ((x >> 1) & bitmask_1);
+    x = (x & bitmask_2) + ((x >> 2) & bitmask_2);
+    x = (x & bitmask_3) + ((x >> 4) & bitmask_3);
+
+    if constexpr (sizeof(T) > 1) x = (x & bitmask_16) + ((x >> 8) & bitmask_16);
+    if constexpr (sizeof(T) > 2) x = (x & bitmask_32) + ((x >> 16) & bitmask_32);
+    if constexpr (sizeof(T) > 4) x = (x & bitmask_64) + ((x >> 32) & bitmask_64);
+
+    return x; // GCC seem to be smart enough to replace this with a built-in
+} // C++20 adds a proper 'std::popcount()'
+
+// Quick approximation of normal distribution based on this excellent reddit thread:
+// https://www.reddit.com/r/algorithms/comments/yyz59u/fast_approximate_gaussian_generator/
+//
+// Lack of <cmath> functions also allows us to 'constexpr' everything
+
 template <class T>
-constexpr bool operator==(const UniformRealDistribution<T>& lhs, const UniformRealDistribution<T>& rhs) noexcept {
-    return lhs.a() == rhs.a() && lhs.b() == rhs.b();
+[[nodiscard]] constexpr T _approx_standard_normal_from_u32_pair(std::uint32_t major, std::uint32_t minor) noexcept {
+    constexpr T delta = T(1) / T(4294967296); // (1 / 2^32)
+
+    T x = _popcount(major); // random binomially distributed integer 0 to 32
+    x += minor * delta;     // linearly fill the gaps between integers
+    x -= T(16.5);           // re-center around 0 (the mean should be 16+0.5)
+    x *= T(0.3535534);      // scale to ~1 standard deviation
+    return x;
+
+    // 'x' now has a mean of 0, stddev very close to 1, and lies strictly in [-5.833631, 5.833631] range,
+    // there are exactly 33 * 2^32 possible outputs which is slightly more than 37 bits of entropy,
+    // the distribution is approximated via 33 equally spaced intervals each of which is further subdivided
+    // into 2^32 parts. As a result we have a very fast, but noticeably inaccurate approximation, not suitable
+    // for research, but might prove very useful in fuzzing / gamedev where quality is not that important.
 }
+
+template <class T>
+[[nodiscard]] constexpr T _approx_standard_normal_from_u64(std::uint64_t rng) noexcept {
+    return _approx_standard_normal_from_u32_pair<T>(static_cast<std::uint32_t>(rng >> 32),
+                                                    static_cast<std::uint32_t>(rng));
+}
+
+template <class T, class Gen>
+constexpr T _approx_standard_normal(Gen& gen) noexcept {
+    // Ensure PRNG is bit-uniform
+    using generated_type = typename Gen::result_type;
+
+    static_assert(Gen::min() == 0);
+    static_assert(Gen::max() == std::numeric_limits<generated_type>::max());
+
+    // Forward PRNG to a fast approximation
+    if constexpr (sizeof(generated_type) == 8) {
+        return _approx_standard_normal_from_u64<T>(gen());
+    } else if constexpr (sizeof(generated_type) == 4) {
+        return _approx_standard_normal_from_u32_pair<T>(static_cast<std::uint32_t>(gen() >> 32),
+                                                        static_cast<std::uint32_t>(gen()));
+    } else {
+        static_assert(_always_false_v<T>, "ApproxNormalDistribution<> only supports bit-uniform 32/64-bit PRNGs.");
+        // we could use a slower fallback for esoteric PRNGs, but I think it's better to explicitly state when "fast
+        // approximate" is not available, esoteric PRNGs are already handled by a regular NormalDistribution
+    }
+}
+
+template <class T = double, _require<std::is_floating_point_v<T>> = true>
+struct ApproxNormalDistribution {
+    using result_type = T;
+
+    struct param_type {
+        result_type mean   = 0;
+        result_type stddev = 1;
+    } pars{};
+
+    constexpr ApproxNormalDistribution() = default;
+    constexpr ApproxNormalDistribution(T mean, T stddev) noexcept : pars({mean, stddev}) { assert(stddev >= T(0)); }
+    constexpr ApproxNormalDistribution(const param_type& p) noexcept : pars(p) { assert(p.stddev >= T(0)); }
+
+    template <class Gen>
+    constexpr result_type operator()(Gen& gen) noexcept {
+        return _approx_standard_normal<result_type>(gen) * this->pars.stddev + this->pars.mean;
+    }
+
+    template <class Gen>
+    constexpr result_type operator()(Gen& gen, const param_type& params) noexcept {
+        assert(params.stddev >= T(0));
+        return _approx_standard_normal<result_type>(gen) * params.stddev + params.mean;
+    }
+
+    constexpr void reset() const noexcept {
+        this->saved           = 0;
+        this->saved_available = false;
+    }
+    [[nodiscard]] constexpr param_type  param() const noexcept { return this->pars; }
+    constexpr void                      param(const param_type& p) noexcept { *this = NormalDistribution(p); }
+    [[nodiscard]] constexpr result_type mean() const noexcept { return this->pars.mean; }
+    [[nodiscard]] constexpr result_type stddev() const noexcept { return this->pars.stddev; }
+    [[nodiscard]] constexpr result_type min() const noexcept { return std::numeric_limits<result_type>::lowest(); }
+    [[nodiscard]] constexpr result_type max() const noexcept { return std::numeric_limits<result_type>::max(); }
+
+    constexpr bool operator==(const ApproxNormalDistribution& other) noexcept {
+        return this->mean() == other.mean() && this->stddev() == other.stddev();
+    }
+    constexpr bool operator!=(const ApproxNormalDistribution& other) noexcept { return !(*this == other); }
+};
 
 // ========================
 // --- Random Functions ---
@@ -10447,13 +10662,20 @@ void _append_decorated_value(std::ostream& os, const T& value) {
             const std::string mantissa = number_string.substr(0, e_index - 1);
             const char        sign     = number_string.at(e_index + 1);
             const std::string exponent = number_string.substr(e_index + 2);
+            
+            const bool        mantissa_is_one =
+                mantissa == "1" || mantissa == "1." || mantissa == "1.0" || mantissa == "1.00" || mantissa == "1.000";
+            // dirty, simple, a sensible person would figure this out with math a lookup tables
 
             number_string.clear();
-            if (mantissa != "1.") number_string += mantissa;
-            if (mantissa != "1.") number_string += " \\cdot ";
+            if (!mantissa_is_one) { // powers of 10 don't need the fractional part
+                number_string += mantissa;
+                number_string += " \\cdot "; 
+            }
             number_string += "10^{";
             if (sign == '-') number_string += sign;
-            number_string += _trim_left(exponent, '0');
+            const std::string trimmed_exponent = _trim_left(exponent, '0');
+            number_string += trimmed_exponent.empty() ? "0" : trimmed_exponent; // prevent stuff like '10^{}'
             number_string += '}';
         }
 
@@ -10544,10 +10766,10 @@ inline void hline() {
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Thin wrapper around <chrono> and <ctime> to make common things easier, initially 
+// Thin wrapper around <chrono> and <ctime> to make common things easier, initially
 // started as 'utl::timer' which was a convenient global-state timer that dealt in doubles.
 // After some time and a good read through <chrono> documentation it was deprecated in favor
-// of a this 'utl::time' module, the rewrite got rid of any global state and added better type  
+// of a this 'utl::time' module, the rewrite got rid of any global state and added better type
 // safety by properly using <chrono> type system.
 //
 // The reason we can do things so conveniently is because chrono 'duration' and 'time_moment'
@@ -10853,7 +11075,7 @@ utl_timer_deprecate inline void start() noexcept { _start_timepoint = _clock::no
 
 [[nodiscard]] inline std::string elapsed_string_fullform() {
     long long unaccounted_ms = static_cast<long long>(_elapsed_time_as_ms());
-    
+
     long long hours = 0;
     long long min   = 0;
     long long sec   = 0;
@@ -10932,9 +11154,3 @@ auto _available_localtime_impl(TimeMoment time_moment, TimeType timer)
 
 #endif
 #endif // module utl::timer
-
-
-
-
-
-

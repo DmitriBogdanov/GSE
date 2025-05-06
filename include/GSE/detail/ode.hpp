@@ -39,13 +39,18 @@
 
 namespace gse::ode::defaults {
 
-constexpr Scalar tau       = 1e-3;
-constexpr Scalar tau_min   = 1e-9;
-constexpr Scalar tau_max   = 1e-1;
-constexpr Scalar tolerance = 1e-12;
-constexpr Scalar fact      = 0.7;
-constexpr Scalar factmin   = 0.7;
-constexpr Scalar factmax   = 1.5;
+// General
+constexpr Scalar tau                   = 1e-3;
+// Implicit
+constexpr Scalar newton_precision      = 1e-12;
+constexpr Scalar newton_max_iterations = 100;
+// Adaptive methods
+constexpr Scalar tau_min               = 1e-9;
+constexpr Scalar tau_max               = 1e-1;
+constexpr Scalar tolerance             = 1e-12;
+constexpr Scalar fact                  = 0.7;
+constexpr Scalar factmin               = 0.7;
+constexpr Scalar factmax               = 1.5;
 
 } // namespace gse::ode::defaults
 
@@ -61,6 +66,12 @@ namespace gse::ode::integrators {
 template <Extent N = dynamic_size>
 struct Base {
     Scalar tau = defaults::tau; // time step
+};
+
+template <Extent N = dynamic_size>
+struct ImplicitBase : Base<N> {
+    Scalar newton_precision      = defaults::newton_precision;
+    Scalar newton_max_iterations = defaults::newton_max_iterations;
 };
 
 template <Extent N = dynamic_size>
@@ -90,6 +101,23 @@ struct Euler : Base<N> {
     template <class Func>
     void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
         y0 += this->tau * f(t, y0);
+        t += this->tau;
+    }
+};
+
+// Euler
+// > Euler's semi-implicit method
+// > Implicit, O(tau)
+// > Symplectic (conserves energy)
+template <Extent N = dynamic_size>
+struct SymmetricEuler : ImplicitBase<N> {
+    template <class Func>
+    void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
+        const auto implicit_equation = [&](const Vector<N>& yn) -> Vector<N> {
+            return yn - y0 - this->tau * 0.5 * (f(t + this->tau, yn) + f(t, y0));
+        };
+
+        y0 = alg::solve(implicit_equation, y0, this->newton_precision, this->newton_max_iterations);
         t += this->tau;
     }
 };
@@ -209,7 +237,6 @@ struct DOPRI45 : AdaptiveBase<N> {
             this->err = 0; // = 1 / (2^p - 1) * max{...}
             for (Idx i = 0; i < y_hat.size(); ++i)
                 this->err = std::max(this->err, std::abs(y_hat[i] - y[i]) / std::abs(y_hat[i]));
-            this->err *= 1. / (32. - 1.);
 
             // Step correction
             // tau *= clamp( fact * (tol / err)^[1 / (p-1)], factmin, factmax )
@@ -286,15 +313,9 @@ void solve(Func&&       f,                         // system RHS
         }
     };
 
-    const auto handle_callback = [&] {
-        if (t_since_callback < callback_frequency) return;
-        t_since_callback -= callback_frequency;
-        callback(t, y0, integrator);
-    };
-
     // Iteration 0 (initial state)
     if (verify) test_solution_for_divergence(); // don't wanna pay for optional things even a little
-    handle_callback();
+    callback(t, y0, integrator);
 
     // Iterations 1...M (integration)
     while (t < t1) {
@@ -303,7 +324,11 @@ void solve(Func&&       f,                         // system RHS
         t_since_callback += t - t_prev;
 
         if (verify) test_solution_for_divergence();
-        handle_callback();
+
+        // Handle callback
+        if (t_since_callback < callback_frequency) continue;
+        t_since_callback -= callback_frequency;
+        callback(t, y0, integrator);
     }
 }
 

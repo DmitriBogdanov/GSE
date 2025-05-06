@@ -51,6 +51,26 @@ using Matrix = Eigen::Matrix<Scalar, rows, cols>;
 // template <Extent rows = dynamic_size, Extent cols = dynamic_size>
 // using MatrixView = typename Matrix<rows, cols>::MapType;
 
+// ======================
+// --- Initialization --- // TODO: Move to a different header, add random initialization with a better PRNG
+// ======================
+
+namespace init {
+
+template <Extent N = dynamic_size>
+gse::Vector<N> zero(gse::Idx rows) {
+    assert(rows >= 0);
+    return gse::Vector<N>::Zero(rows);
+}
+
+template <Extent N = dynamic_size, Extent M = dynamic_size>
+gse::Matrix<N, M> zero(gse::Idx rows, gse::Idx cols) {
+    assert(rows >= 0 && cols >= 0);
+    return gse::Matrix<N, M>::Zero(rows, cols);
+}
+
+} // namespace init
+
 // ===============
 // --- Helpers ---
 // ===============
@@ -66,16 +86,6 @@ Vector<> make_vector(std::initializer_list<Scalar> init_list) {
     for (Idx i = 0; i < res.size(); ++i) res[i] = init_list.begin()[i];
     return res;
 }
-
-// template<class T>
-// const std::decay_t<T>& raw_cref(T&& value) {
-//     return std::forward<T>(value);
-// }
-
-// template<class T>
-// std::decay_t<T>& raw_ref(T&& value) {
-//     return std::forward<T>(value);
-// }
 
 // ==================
 // --- Formatting ---

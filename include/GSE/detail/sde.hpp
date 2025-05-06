@@ -89,7 +89,7 @@ struct ModifiedMilstein : Base<N> {
         const Vector<N> Y = y0 + this->tau * A(t, y0) + sqrt_of_tau * B(t, y0);
 
         y0 += this->tau * A(t, y0) + dW.cwiseProduct(B(t, y0)) +
-              0.5 * (B(t, Y) - B(t, y0)).cwiseProduct(dW.square() - this->tau) / sqrt_of_tau;
+              0.5 * (B(t, Y) - B(t, y0)).cwiseProduct(dW.cwiseAbs2() - this->tau) / sqrt_of_tau;
         t += this->tau;
     }
 };
@@ -101,6 +101,11 @@ struct ModifiedMilstein : Base<N> {
 // ==================
 
 namespace gse::sde {
+
+// Type-erased functions
+using RHS        = std::function<Vector<>(Scalar, Vector<>)>;
+using Integrator = std::function<void(RHS f, Scalar& t, Vector<>& y0)>;
+using Callback   = std::function<void(Scalar t, Vector<> y0, Integrator f)>;
 
 // Required callable signatures:
 //    > Vector<N> A(Scalar t, const Vector<N>& y0)
@@ -152,15 +157,9 @@ void solve(FuncA&&      A,                         // system RHS (deterministic 
         }
     };
 
-    const auto handle_callback = [&] {
-        if (t_since_callback < callback_frequency) return;
-        t_since_callback -= callback_frequency;
-        callback(t, y0, integrator);
-    };
-
     // Iteration 0 (initial state)
     if (verify) test_solution_for_divergence(); // don't wanna pay for optional things even a little
-    handle_callback();
+    callback(t, y0, integrator);
 
     // Iterations 1...M (integration)
     while (t < t1) {
@@ -169,7 +168,11 @@ void solve(FuncA&&      A,                         // system RHS (deterministic 
         t_since_callback += t - t_prev;
 
         if (verify) test_solution_for_divergence();
-        handle_callback();
+
+        // Handle callback
+        if (t_since_callback < callback_frequency) continue;
+        t_since_callback -= callback_frequency;
+        callback(t, y0, integrator);
     }
 }
 

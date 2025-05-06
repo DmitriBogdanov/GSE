@@ -63,14 +63,15 @@ void solve_with_integrator(Integrator&& integrator, const std::string& path) {
         // Save solution to JSON
         json::Node step_info;
 
-        step_info["t"]            = t;
-        step_info["tau"]          = integrator.tau;
-        step_info["y"]            = gse::to_std(y0);
-        step_info["y_analytical"] = gse::to_std(problem::analytical_solution(t));
-        step_info["err_local"]    = err_local;
-        step_info["err_global"]   = err_global;
-        step_info["steps_taken"]   = integrator.steps_taken;
-        step_info["steps_discarded"]   = integrator.steps_discarded;
+        step_info["t"]               = t;
+        step_info["tau"]             = integrator.tau;
+        step_info["y"]               = gse::to_std(y0);
+        step_info["y_analytical"]    = gse::to_std(problem::analytical_solution(t));
+        step_info["err_estimate"]    = integrator.err;
+        step_info["err_local"]       = err_local;
+        step_info["err_global"]      = err_global;
+        step_info["steps_taken"]     = integrator.steps_taken;
+        step_info["steps_discarded"] = integrator.steps_discarded;
 
         json["solution"].push_back(std::move(step_info));
     };
@@ -104,15 +105,15 @@ int main() {
     // ----------------
 
     // Task: Fixed tolerance DOPRI45, play around with tau_0 / fact / factmin / factmax and record results in a table
-    
+
     log::println();
     log::println("--- Task (1) ---");
     log::println("----------------");
     log::println();
-    
+
     // Wrapp integrator creation in lambda to init with a different set of default params
     const auto create_dopri45 = create_integrator<gse::ode::integrators::DOPRI45<2>>;
-    const auto create_rk4re = create_integrator<gse::ode::integrators::RK4RE<2>>;
+    const auto create_rk4re   = create_integrator<gse::ode::integrators::RK4RE<2>>;
 
     // Export path for the result files
     std::size_t counter            = 0;
@@ -121,15 +122,17 @@ int main() {
     };
 
     // Table setup
-    const auto table_heading = []{
+    const auto table_heading = [] {
         table::create({18, 18, 6, 9, 9, 12, 15, 10, 17});
-        table::set_formats({table::SCIENTIFIC(1), table::SCIENTIFIC(1), table::FIXED(1), table::FIXED(1), table::FIXED(1),
-                            table::DEFAULT(), table::DEFAULT(), table::FIXED(2), table::SCIENTIFIC(2)});
+        table::set_formats({table::SCIENTIFIC(1), table::SCIENTIFIC(1), table::FIXED(2), table::FIXED(1),
+                            table::FIXED(1), table::DEFAULT(), table::DEFAULT(), table::FIXED(2),
+                            table::SCIENTIFIC(2)});
         table::set_latex_mode(false); // <- change this to export tables straight in LaTeX format
-        table::cell("$tol$", "$\\tau_0$", "$fact$", "$factmin$", "$factmax$", "Steps", "Steps discarded", "Time (ms)", "Global Error");
+        table::cell("$tol$", "$\\tau_0$", "$fact$", "$factmin$", "$factmax$", "Steps", "Steps discarded", "Time (ms)",
+                    "Global Error");
         table::hline();
     };
-    
+
     table_heading();
 
     // Vary parameters 1-by-1, varying the whole matrix would give us M^4 combinations which is too much
@@ -167,7 +170,7 @@ int main() {
 
     // Task: Fixed set of params, compare DOPRI45 and RK4RE, record results in a table.
     //       Plot how global error / local error / tau / solution change in time.
-    
+
     log::println();
     log::println("--- Task (2) ---");
     log::println("----------------");
@@ -182,19 +185,22 @@ int main() {
     table_heading();
 
     // Vary tolerance
-    std::vector<gse::Scalar> tol_vals = {1e-3, 1e-4, 1e-6};
+    std::vector<gse::Scalar> tol_vals      = {1e-3, 1e-4, 1e-6};
+    gse::Scalar              fact_override = 0.98;
+
+    for (const auto& tol : tol_vals) {
+        auto integrator      = create_rk4re();
+        integrator.tolerance = tol;
+        integrator.fact      = fact_override;
+        solve_with_integrator(integrator, create_result_path_2());
+    }
+
+    table::hline();
 
     for (const auto& tol : tol_vals) {
         auto integrator      = create_dopri45();
         integrator.tolerance = tol;
-        solve_with_integrator(integrator, create_result_path_2());
-    }
-    
-    table::hline();
-    
-    for (const auto& tol : tol_vals) {
-        auto integrator      = create_rk4re();
-        integrator.tolerance = tol;
+        integrator.fact      = fact_override;
         solve_with_integrator(integrator, create_result_path_2());
     }
 }

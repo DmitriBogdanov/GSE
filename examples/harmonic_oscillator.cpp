@@ -43,10 +43,8 @@ int main() {
     // set '0' to save every time layer
     
     // Integrator (optional)
-    gse::ode::integrators::DOPRI45<2> integrator;
-    integrator.tau       = 3e-1;
-    integrator.tolerance = 1e-7;
-    integrator.tau_max   = 5e-1;
+    gse::ode::integrators::RK4<2> integrator;
+    integrator.tau       = 1e-1;
 
     // Divergence checking (optional)
     constexpr bool verify = true;

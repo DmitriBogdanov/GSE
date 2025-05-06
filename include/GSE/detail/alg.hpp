@@ -11,7 +11,7 @@
 // _______________________ INCLUDES _______________________
 
 #include "core.hpp"
-
+#include <iostream> // TEMP:
 // ____________________ DEVELOPER DOCS ____________________
 
 // TODO: DOCS
@@ -30,12 +30,10 @@ constexpr Scalar diff_eps_inverse = 1. / diff_eps;
 
 template <Extent N = dynamic_size>
 struct JacobianDifferentiator {
-    // - Params -
-
     // - Differentiator -
     template <class Func>
-    void operator()(Matrix<N>& J, Func&& F, const Vector<N>& X) {
-        tmp = X;
+    void operator()(Matrix<N, N>& J, Func&& F, const Vector<N>& X) {
+        Vector<N> tmp = X;
 
         for (Idx j = 0; j < J.cols(); ++j) {
             // Naive formula using central numerical derivative would be:
@@ -54,9 +52,6 @@ struct JacobianDifferentiator {
             J.col(j) *= diff_eps_inverse;
         }
     }
-
-private:
-    Vector<N> tmp;
 };
 
 // TEMP:
@@ -93,7 +88,7 @@ inline Matrix<N> _legacy_jacobian(Func&& F, Vector<N> X) {
 // ========================
 
 namespace gse::alg {
-    
+
 // TEMP:
 // Solve system of algebraic equations F(y) = 0 using y0 as an initial guess
 template <Extent N, class Func>
@@ -119,5 +114,33 @@ inline Vector<N> _legacy_solve(Func&& F, Vector<N> y0, Scalar precision, Uint ma
     return y;
 }
 // TEMP:
+
+// Solve system of algebraic equations F(y) = 0 using y0 as an initial guess
+template <Extent N, class Func>
+inline Vector<N> solve(Func&& F, Vector<N> y0, Scalar precision, Uint max_iterations = 100) {
+    Vector<N> y = y0;
+
+    Matrix<N, N>              J = init::zero<N>(N, N);
+    JacobianDifferentiator<N> differentiator;
+
+    // Fill approximations
+    for (Uint iterations = 0; iterations < max_iterations; ++iterations) {
+        // The naive code would be:
+        //    > y = y = y0 - J.inverse() * F(y0); // Newthon's method iteration
+        // however
+        //    y = y0 - J(y0)^-1 * F(y0)
+        //    => (y - y0) = -J(y0)^-1 * F(y0)
+        //    => J(y0) * (y - y0) = -F(y0)
+        // so no need to compute the inverse, we can just solve a SLAE
+        differentiator(J, F, y0);
+        y = y0 + J.fullPivLu().solve(-F(y0));
+
+        if ((y - y0).norm() < precision) break;
+
+        y0 = y;
+    }
+
+    return y;
+}
 
 } // namespace gse::alg
