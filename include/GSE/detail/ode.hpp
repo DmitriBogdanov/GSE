@@ -17,6 +17,7 @@
 #include "alg.hpp"
 #include "butcher.hpp"
 #include "core.hpp"
+#include "traits.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -278,15 +279,15 @@ using Callback   = std::function<void(Scalar t, Vector<> y0, Integrator f)>;
 //    > void integrator(Scalar& t, Vector<N>& y0, const Func& f)
 // Note 1: The SFINAE is ugly, but it makes user API more robust.
 // Note 2: See 'guide_passing_callables.md'
-template <Extent N,                                 //
-          class Func,                               //
-          class Callback,                           //
-          class Integrator = integrators::RK4RE<N>, //
+template <Extent N,                               //
+          class Func,                             //
+          class Callback,                         //
+          class Integrator = integrators::RK4<N>, //
 
           // Enforce function signatures
-          _require_invocable_r<Vector<N>, Func, Scalar, Vector<N>>                  = true, //
-          _require_invocable<Callback, Scalar, Vector<N>, std::decay_t<Integrator>> = true, //
-          _require_invocable<Integrator, std::decay_t<Func>, Scalar&, Vector<N>&>   = true  //
+          impl::require_invocable_r<Vector<N>, Func, Scalar, Vector<N>>                  = true, //
+          impl::require_invocable<Callback, Scalar, Vector<N>, std::decay_t<Integrator>> = true, //
+          impl::require_invocable<Integrator, std::decay_t<Func>, Scalar&, Vector<N>&>   = true  //
 
           >
 void solve(Func&&       f,                         // system RHS
@@ -326,9 +327,10 @@ void solve(Func&&       f,                         // system RHS
         if (verify) test_solution_for_divergence();
 
         // Handle callback
-        if (t_since_callback < callback_frequency) continue;
-        t_since_callback -= callback_frequency;
-        callback(t, y0, integrator);
+        if (t_since_callback >= callback_frequency) {
+            t_since_callback -= callback_frequency;
+            callback(t, y0, integrator);
+        }
     }
 }
 

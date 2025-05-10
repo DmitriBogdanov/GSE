@@ -11,11 +11,13 @@
 // _______________________ INCLUDES _______________________
 
 #include <cmath>     // sqrt(), isfinite()
-#include <random>    // mt19937, normal_distribution<>
+#include <random>    // normal_distribution<>
 #include <stdexcept> // runtime_error
 #include <string>    // to_string
 
 #include "core.hpp"
+#include "rng.hpp"
+#include "traits.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -118,16 +120,16 @@ template <Extent N,                                            //
           class FuncA,                                         //
           class FuncB,                                         //
           class Callback,                                      //
-          class Integrator = integrators::EulerMaruyama<N>,    //
-          class Gen        = std::mt19937,                     //
+          class Integrator = integrators::ModifiedMilstein<N>, //
+          class Gen        = rng::PRNG,                        //
           class Dist       = std::normal_distribution<Scalar>, //
 
           // Enforce function signatures
-          _require_invocable_r<Vector<N>, FuncA, Scalar, Vector<N>>                 = true, //
-          _require_invocable_r<Vector<N>, FuncB, Scalar, Vector<N>>                 = true, //
-          _require_invocable<Callback, Scalar, Vector<N>, std::decay_t<Integrator>> = true, //
-          _require_invocable<Integrator, Scalar&, Vector<N>&, std::decay_t<FuncA>, std::decay_t<FuncA>,
-                             std::decay_t<Gen>, std::decay_t<Dist>>                 = true //
+          impl::require_invocable_r<Vector<N>, FuncA, Scalar, Vector<N>>                 = true, //
+          impl::require_invocable_r<Vector<N>, FuncB, Scalar, Vector<N>>                 = true, //
+          impl::require_invocable<Callback, Scalar, Vector<N>, std::decay_t<Integrator>> = true, //
+          impl::require_invocable<Integrator, Scalar&, Vector<N>&, std::decay_t<FuncA>, std::decay_t<FuncA>,
+                                  std::decay_t<Gen>, std::decay_t<Dist>>                 = true //
 
           >
 void solve(FuncA&&      A,                         // system RHS (deterministic part)
@@ -170,9 +172,10 @@ void solve(FuncA&&      A,                         // system RHS (deterministic 
         if (verify) test_solution_for_divergence();
 
         // Handle callback
-        if (t_since_callback < callback_frequency) continue;
-        t_since_callback -= callback_frequency;
-        callback(t, y0, integrator);
+        if (t_since_callback >= callback_frequency) {
+            t_since_callback -= callback_frequency;
+            callback(t, y0, integrator);
+        }
     }
 }
 

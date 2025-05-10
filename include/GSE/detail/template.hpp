@@ -22,4 +22,4 @@ namespace gse::XXXXXXXXXXXX {
 
 // TODO: IMPL
 
-} // namespace utl::XXXXXXXXXXXX
+} // namespace gse::XXXXXXXXXXXX

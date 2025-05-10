@@ -11,7 +11,9 @@
 // _______________________ INCLUDES _______________________
 
 #include "detail/alg.hpp"
+#include "detail/init.hpp"
 #include "detail/ode.hpp"
+#include "detail/rng.hpp"
 #include "detail/sde.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________

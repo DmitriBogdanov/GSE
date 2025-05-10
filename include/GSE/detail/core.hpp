@@ -11,10 +11,7 @@
 // _______________________ INCLUDES _______________________
 
 #include <array>            // array<>
-#include <cstddef>          // size_t
-#include <functional>       // function
 #include <initializer_list> // initializer_list<>
-#include <type_traits>      // is_invocable<>, is_invocable_r<>, is_convertible<>
 #include <vector>           // vector<>
 
 #include "thirdparty/Eigen/Dense" // Matrix, Vector, Dynamic
@@ -51,26 +48,6 @@ using Matrix = Eigen::Matrix<Scalar, rows, cols>;
 // template <Extent rows = dynamic_size, Extent cols = dynamic_size>
 // using MatrixView = typename Matrix<rows, cols>::MapType;
 
-// ======================
-// --- Initialization --- // TODO: Move to a different header, add random initialization with a better PRNG
-// ======================
-
-namespace init {
-
-template <Extent N = dynamic_size>
-gse::Vector<N> zero(gse::Idx rows) {
-    assert(rows >= 0);
-    return gse::Vector<N>::Zero(rows);
-}
-
-template <Extent N = dynamic_size, Extent M = dynamic_size>
-gse::Matrix<N, M> zero(gse::Idx rows, gse::Idx cols) {
-    assert(rows >= 0 && cols >= 0);
-    return gse::Matrix<N, M>::Zero(rows, cols);
-}
-
-} // namespace init
-
 // ===============
 // --- Helpers ---
 // ===============
@@ -80,12 +57,6 @@ constexpr Extent extent_rows = static_cast<Extent>(Mat::CompileTimeTraits::RowsA
 
 template <class Mat>
 constexpr Extent extent_cols = static_cast<Extent>(Mat::CompileTimeTraits::ColsAtCompileTime);
-
-Vector<> make_vector(std::initializer_list<Scalar> init_list) {
-    Vector<> res = Vector<>::Zero(init_list.size());
-    for (Idx i = 0; i < res.size(); ++i) res[i] = init_list.begin()[i];
-    return res;
-}
 
 // ==================
 // --- Formatting ---
@@ -104,7 +75,7 @@ auto to_std(const Vector<N>& vec) {
         for (std::size_t i = 0; i < N; ++i) res[i] = vec[i];
         return res;
     }
-} 
+}
 
 // Convert 'Matrix<N, M>' to std-containers
 template <Extent N, Extent M>
@@ -148,24 +119,5 @@ inline const Eigen::IOFormat vector(6, 0, ", ", ", ", "", "", "{", "}");
 inline const Eigen::IOFormat none(6, 0, " ", " ", "", "", "", "");
 
 } // namespace format
-
-// ===================
-// --- Type traits ---
-// ===================
-
-template <bool Cond>
-using _require = std::enable_if_t<Cond, bool>;
-
-template <class T, class Signature>
-using _require_signature = _require<std::is_convertible_v<T, std::function<Signature>>>;
-
-template <class T, class... Args>
-using _require_invocable = _require<std::is_invocable_v<T, Args...>>;
-
-template <class T, class... Args>
-using _require_not_invocable = _require<!std::is_invocable_v<T, Args...>>;
-
-template <class Ret, class T, class... Args>
-using _require_invocable_r = _require<std::is_invocable_r_v<Ret, T, Args...>>;
 
 } // namespace gse
