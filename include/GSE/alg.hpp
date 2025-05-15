@@ -10,12 +10,11 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "core.hpp"
-#include "init.hpp"
+#include "core.hpp" // ...
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Algebraic system solvers
+// Jacobian computation. Algebraic system solver.
 
 // ____________________ IMPLEMENTATION ____________________
 

@@ -10,11 +10,11 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "core.hpp"
+#include "types.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// This is a header for Butcher Tables & step functions of various Runge-Kutta methods.
+// Butcher Tables & step functions of various Runge-Kutta methods.
 //
 // Special values '0' and '1' are marked with '[!zero]' and '[!one]' comments
 // and can be effectively skipped in the computation.
@@ -24,12 +24,13 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
+// =====================
 // --- Runge-Kutta 4 ---
-// ---------------------
+// =====================
 
 // See https://en.wikipedia.org/wiki/Runge–Kutta_methods
 
-namespace gse::butcher::rk4 {
+namespace gse::impl::butcher::rk4 {
 
 constexpr Scalar c1 = 0.; // [!zero]
 constexpr Scalar c2 = 1. / 2.;
@@ -37,10 +38,10 @@ constexpr Scalar c3 = 1. / 2.;
 constexpr Scalar c4 = 1.; // [!one]
 
 constexpr Scalar a21 = 1. / 2.;
-constexpr Scalar a31 = 0.;
+constexpr Scalar a31 = 0.; // [!zero]
 constexpr Scalar a32 = 1. / 2.;
-constexpr Scalar a41 = 0.;
-constexpr Scalar a42 = 0.;
+constexpr Scalar a41 = 0.; // [!zero]
+constexpr Scalar a42 = 0.; // [!zero]
 constexpr Scalar a43 = 1.; // [!one]
 
 constexpr Scalar b1 = 1. / 6.;
@@ -69,14 +70,15 @@ Vector<N> step(Func&& f, Scalar t, Vector<N>& y0, Scalar tau) {
     return y0 + tau * bd * (k1 + bn2 * k2 + bn3 * k3 + k4);
 }
 
-} // namespace gse::butcher::rk4
+} // namespace gse::impl::butcher::rk4
 
+// ===========================
 // --- Dormand-Prince 4(5) ---
-// ---------------------------
+// ===========================
 
 // See https://en.wikipedia.org/wiki/Dormand–Prince_method
 
-namespace gse::butcher::dopri45 {
+namespace gse::impl::butcher::dopri45 {
 
 constexpr Scalar c1 = 0.; // [!zero]
 constexpr Scalar c2 = 1. / 5.;
@@ -134,10 +136,10 @@ Vector<N> step(Func&& f, Scalar t, const Vector<N>& y0, Scalar tau) {
     const Vector<N> k3 = f(t + tau * c3, y0 + tau * (a31 * k1 + a32 * k2));
     const Vector<N> k4 = f(t + tau * c4, y0 + tau * (a41 * k1 + a42 * k2 + a43 * k3));
     const Vector<N> k5 = f(t + tau * c5, y0 + tau * (a51 * k1 + a52 * k2 + a53 * k3 + a54 * k4));
-    const Vector<N> k6 = f(t + tau * c6, y0 + tau * (a61 * k1 + a62 * k2 + a63 * k3 + a64 * k4 + a65 * k5));
-    const Vector<N> k7 = f(t + tau * c7, y0 + tau * (a71 * k1 + a72 * k2 + a73 * k3 + a74 * k4 + a75 * k5 + a76 * k6));
+    const Vector<N> k6 = f(t + tau, y0 + tau * (a61 * k1 + a62 * k2 + a63 * k3 + a64 * k4 + a65 * k5));
+    const Vector<N> k7 = f(t + tau, y0 + tau * (a71 * k1 + a73 * k3 + a74 * k4 + a75 * k5 + a76 * k6));
 
-    return y0 + tau * (b1 * k1 + b2 * k2 + b3 * k3 + b4 * k4 + b5 * k5 + b6 * k6 + b7 * k7);
+    return y0 + tau * (b1 * k1 + b3 * k3 + b4 * k4 + b5 * k5 + b6 * k6 + b7 * k7);
 }
 
 template <Extent N, class Func>
@@ -148,13 +150,13 @@ std::pair<Vector<N>, Vector<N>> embedded_step(Func&& f, Scalar t, const Vector<N
     const Vector<N> k3 = f(t + tau * c3, y0 + tau * (a31 * k1 + a32 * k2));
     const Vector<N> k4 = f(t + tau * c4, y0 + tau * (a41 * k1 + a42 * k2 + a43 * k3));
     const Vector<N> k5 = f(t + tau * c5, y0 + tau * (a51 * k1 + a52 * k2 + a53 * k3 + a54 * k4));
-    const Vector<N> k6 = f(t + tau * c6, y0 + tau * (a61 * k1 + a62 * k2 + a63 * k3 + a64 * k4 + a65 * k5));
-    const Vector<N> k7 = f(t + tau * c7, y0 + tau * (a71 * k1 + a72 * k2 + a73 * k3 + a74 * k4 + a75 * k5 + a76 * k6));
+    const Vector<N> k6 = f(t + tau, y0 + tau * (a61 * k1 + a62 * k2 + a63 * k3 + a64 * k4 + a65 * k5));
+    const Vector<N> k7 = f(t + tau, y0 + tau * (a71 * k1 + a73 * k3 + a74 * k4 + a75 * k5 + a76 * k6));
 
     return {
-        y0 + tau * (be1 * k1 + be2 * k2 + be3 * k3 + be4 * k4 + be5 * k5 + be6 * k6),
+        y0 + tau * (be1 * k1 + be3 * k3 + be4 * k4 + be5 * k5 + be6 * k6),
         y0 + tau * (b1 * k1 + b2 * k2 + b3 * k3 + b4 * k4 + b5 * k5 + b6 * k6 + b7 * k7),
     };
 }
 
-} // namespace gse::butcher::dopri45
+} // namespace gse::impl::butcher::dopri45

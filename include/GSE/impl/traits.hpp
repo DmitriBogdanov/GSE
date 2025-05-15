@@ -12,16 +12,14 @@
 
 #include <cstdint>     // uint32_t
 #include <functional>  // function<>
-#include <type_traits> // is_invocable<>, is_invocable_r<>, is_convertible<>
+#include <type_traits> // enable_if_t<>, is_invocable<>, is_invocable_r<>, is_convertible<>
 #include <utility>     // declval<>()
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Type traits & SFINAE helpers
+// Type traits & SFINAE helpers.
 
 // ____________________ IMPLEMENTATION ____________________
-
-
 
 namespace gse::impl {
 

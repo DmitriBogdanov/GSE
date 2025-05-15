@@ -1,8 +1,7 @@
 // __________ BENCHMARK FRAMEWORK & LIBRARY  __________
 
-#include "GSE/detail/core.hpp"
-#include "GSE/detail/ode.hpp"
-#include "GSE/detail/thirdparty/Eigen/src/Core/Matrix.h"
+#include "GSE/ode.hpp"
+
 #include "benchmark.hpp"
 #include <dwarf.h>
 #include <functional>

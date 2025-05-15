@@ -1,7 +1,5 @@
-#include "GSE/GSE.hpp"
+#include "GSE/ode.hpp"
 
-#include "GSE/detail/core.hpp"
-#include "GSE/detail/ode.hpp"
 #include "firstparty/UTL.hpp" // JSON, progressbars, etc.
 #include <filesystem>
 #include <limits>

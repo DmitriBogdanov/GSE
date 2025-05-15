@@ -10,57 +10,19 @@
 
 // _______________________ INCLUDES _______________________
 
-#include <array>            // array<>
-#include <initializer_list> // initializer_list<>
-#include <vector>           // vector<>
-
-#include "thirdparty/Eigen/Dense" // Matrix, Vector, Dynamic
+#include "types.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// TODO: DOCS
+// Type conversion and IO formats useful for matrix serializing.
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace gse {
-
-// ===================
-// --- Basic Types ---
-// ===================
-
-using Idx    = Eigen::Index;             // ptrdiff_t
-using Extent = decltype(Eigen::Dynamic); // int
-using Uint   = unsigned int;
-
-constexpr Extent dynamic_size = Eigen::Dynamic;
-
-using Scalar = double;
-
-template <Extent rows = dynamic_size>
-using Vector = Eigen::Vector<Scalar, rows>;
-
-template <Extent rows = dynamic_size, Extent cols = dynamic_size>
-using Matrix = Eigen::Matrix<Scalar, rows, cols>;
-
-// template <Extent rows = dynamic_size>
-// using VectorView = typename Vector<rows>::MapType;
-
-// template <Extent rows = dynamic_size, Extent cols = dynamic_size>
-// using MatrixView = typename Matrix<rows, cols>::MapType;
-
-// ===============
-// --- Helpers ---
-// ===============
-
-template <class Mat>
-constexpr Extent extent_rows = static_cast<Extent>(Mat::CompileTimeTraits::RowsAtCompileTime);
-
-template <class Mat>
-constexpr Extent extent_cols = static_cast<Extent>(Mat::CompileTimeTraits::ColsAtCompileTime);
-
 // ==================
-// --- Formatting ---
+// --- Conversion ---
 // ==================
+
+namespace gse::impl {
 
 // Convert 'Vector<N>' to std-containers
 template <Extent N>
@@ -112,12 +74,16 @@ auto to_std(const Matrix<N, M>& mat) {
     }
 }
 
-namespace format {
+} // namespace gse::impl
+
+// =================
+// --- IO Format ---
+// =================
+
+namespace gse::impl::format {
 
 inline const Eigen::IOFormat matrix(6, 0, ", ", "\n", "[", "]");
 inline const Eigen::IOFormat vector(6, 0, ", ", ", ", "", "", "{", "}");
 inline const Eigen::IOFormat none(6, 0, " ", " ", "", "", "", "");
 
 } // namespace format
-
-} // namespace gse

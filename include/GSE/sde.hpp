@@ -16,16 +16,12 @@
 #include <string>    // to_string
 
 #include "core.hpp"
-#include "rng.hpp"
-#include "traits.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
 // SDE (Stochastic Differential Equation) params, integrators and a solver-function.
 //
-// Some signatures may seem unwieldy with all the templates, but such is the price of being generic, in the
-// end we get a very nice, flexible and completely modular API with no unnecessary overhead baked into it.
-// All the convenience of Matlab-like API with full flexibility intact.
+// All things from 'ode.hpp' developer docs also hold true here.
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -121,7 +117,7 @@ template <Extent N,                                            //
           class FuncB,                                         //
           class Callback,                                      //
           class Integrator = integrators::ModifiedMilstein<N>, //
-          class Gen        = rng::PRNG,                        //
+          class Gen        = PRNG,                             //
           class Dist       = std::normal_distribution<Scalar>, //
 
           // Enforce function signatures

@@ -14,14 +14,14 @@
 #include <stdexcept> // runtime_error
 #include <string>    // to_string
 
-#include "alg.hpp"
-#include "butcher.hpp"
-#include "core.hpp"
-#include "traits.hpp"
+#include "alg.hpp"          // alg::solve()
+#include "core.hpp"         // ...
+#include "impl/butcher.hpp" // butcher::
+#include "impl/traits.hpp"  // require_invocable, require_invocable_r
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// ODE (Ordinary Differential Equation) params, integrators and a solver-function.
+// ODE (Ordinary Differential Equation) params, integrators and solver.
 //
 // Some signatures may seem unwieldy with all the templates, but such is the price of being generic, in the
 // end we get a very nice, flexible and completely modular API with no unnecessary overhead baked into it.
@@ -31,6 +31,10 @@
 // any kind of integrator and treat it like a black box that simply advances the solution, the users will be
 // able to get 't', 'y' and whatever integrator state they need by simply providing a callback lambda that
 // takes integrator as a 'const auto&'.
+//
+// This approach also allows us to avoid vector reallocations during integration by simply making integrators
+// stateful, however rather surprisingly such optimization produces no significant impact even for small systems
+// with a relatively simple RHS. For implementation clarity this optimization is not currently used.
 
 // ____________________ IMPLEMENTATION ____________________
 
@@ -131,7 +135,7 @@ struct RK4 : Base<N> {
 
     template <class Func>
     void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
-        y0 = butcher::rk4::step(f, t, y0, this->tau);
+        y0 = impl::butcher::rk4::step(f, t, y0, this->tau);
         t += this->tau;
     }
 };
@@ -146,7 +150,7 @@ struct AdamsRK4 : Base<N> {
     void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
         // First 4 iterations are obtained through RK4
         if (this->iteration < 4) {
-            y0 = butcher::rk4::step(f, t, y0, this->tau);
+            y0 = impl::butcher::rk4::step(f, t, y0, this->tau);
             t += this->tau;
 
             if (this->iteration == 0) this->fm4 = f(t, y0);
@@ -186,11 +190,11 @@ struct RK4RE : AdaptiveBase<N> {
 
         while (true) {
             // One double-step
-            w = butcher::rk4::step(f, t, y0, 2 * this->tau);
+            w = impl::butcher::rk4::step(f, t, y0, 2 * this->tau);
 
             // Two regular steps
-            y2 = butcher::rk4::step(f, t, y0, this->tau);
-            y2 = butcher::rk4::step(f, t, y2, this->tau);
+            y2 = impl::butcher::rk4::step(f, t, y0, this->tau);
+            y2 = impl::butcher::rk4::step(f, t, y2, this->tau);
 
             // Error estimate
             this->err = 0; // = 1 / (2^p - 1) * max{...}
@@ -232,7 +236,7 @@ struct DOPRI45 : AdaptiveBase<N> {
 
         while (true) {
             // Embedded step
-            std::tie(y, y_hat) = butcher::dopri45::embedded_step(f, t, y0, this->tau);
+            std::tie(y, y_hat) = impl::butcher::dopri45::embedded_step(f, t, y0, this->tau);
 
             // Error estimate
             this->err = 0; // = 1 / (2^p - 1) * max{...}

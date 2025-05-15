@@ -14,36 +14,36 @@
 #include <cstdint> // uint32_t, uint64_t
 #include <limits>  // numeric_limits<>::max()
 
-#include "traits.hpp"
+#include "traits.hpp" // require_seed_seq<>
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Better default RNG that the one used in Eigen (better quality & performance), more explicit global PRNG 
-
-// ____________________ IMPLEMENTATION ____________________
-
-// ===========================
-// --- PRNG implementation ---
-// ===========================
-
-namespace gse::impl::rng {
-
-constexpr std::uint64_t default_seed = std::numeric_limits<std::uint64_t>::max() / 2 + 1;
-
-// Implementation of SplitMix64 PRNG from the first-party 'utl::random' library,
+// Better default PRNG, Eigen uses 'rand()' which is quite subpar both in speed and quality,
+// here we implement SplitMix64 which is one of the fastest statistically solid 64-bit PRNGs.
+//
+// Implementation taken from the first-party library 'utl::random',
 // see https://github.com/DmitriBogdanov/UTL/blob/master/include/UTL/random.hpp
 //
-// One of the fastest statistically solid PRNGs, we use it instead of Eigen's internal LCG.
 // If more RNG stuff is needed see the original 'utl::random' lib, GSE API are quite flexible
 // and will be able to make use of its PRNGs & distributions. This one is embedded simply to
 // ensure a solid default choice.
-//
+
+// ____________________ IMPLEMENTATION ____________________
+
+// =======================
+// --- SplitMix64 PRNG ---
+// =======================
+
+namespace gse::impl {
+
 class SplitMix64 {
 public:
     using result_type = std::uint64_t;
 
 private:
     result_type s{};
+
+    constexpr static std::uint64_t default_seed = std::numeric_limits<std::uint64_t>::max() / 2 + 1;
 
 public:
     constexpr explicit SplitMix64(result_type seed = default_seed) noexcept { this->seed(seed); }
@@ -73,18 +73,6 @@ public:
     }
 };
 
-} // namespace gse::impl::rng
+using PRNG = SplitMix64;
 
-// ================
-// --- PRNG API ---
-// ================
-
-namespace gse::rng {
-
-using PRNG = impl::rng::SplitMix64;
-
-inline PRNG default_generator;
-
-inline void seed(std::uint64_t random_seed) noexcept { default_generator.seed(random_seed); }
-
-} // namespace gse::rng
+} // namespace gse::impl
