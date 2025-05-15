@@ -50,9 +50,9 @@ constexpr Scalar tau                   = 1e-3;
 constexpr Scalar newton_precision      = 1e-12;
 constexpr Scalar newton_max_iterations = 100;
 // Adaptive methods
-constexpr Scalar tau_min               = 1e-9;
+constexpr Scalar tau_min               = 1e-8;
 constexpr Scalar tau_max               = 1e-1;
-constexpr Scalar tolerance             = 1e-12;
+constexpr Scalar tolerance             = 1e-8;
 constexpr Scalar fact                  = 0.7;
 constexpr Scalar factmin               = 0.7;
 constexpr Scalar factmax               = 1.5;
@@ -115,7 +115,7 @@ struct Euler : Base<N> {
 // > Implicit, O(tau)
 // > Symplectic (conserves energy)
 template <Extent N = dynamic_size>
-struct SymmetricEuler : ImplicitBase<N> {
+struct Trapezoidal : ImplicitBase<N> {
     template <class Func>
     void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
         const auto implicit_equation = [&](const Vector<N>& yn) -> Vector<N> {
