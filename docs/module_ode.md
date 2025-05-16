@@ -142,7 +142,7 @@ DESC:
 [Harmonic oscillator](https://en.wikipedia.org/wiki/Harmonic_oscillator) is described by the following ODE system:
 $$
 \begin{cases}
-\dot{x} = v, \\
+\dot{x} = v, \\\\
 \dot{v} = -\dfrac{k}{m}x
 \end{cases}
 $$

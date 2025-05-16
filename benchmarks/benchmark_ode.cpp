@@ -11,9 +11,9 @@
 // --- Bench a single RHS / integrator row ---
 // -------------------------------------------
 
-constexpr gse::Extent N   = 47;
+constexpr gse::Extent N   = 6; // smaller 'N' should put more stress on allocator
 constexpr gse::Scalar c   = N;
-constexpr gse::Scalar T   = 1;
+constexpr gse::Scalar T   = 5;
 constexpr gse::Scalar tau = 1e-5;
 
 namespace integrators = gse::ode::integrators;
@@ -35,7 +35,10 @@ void bench_sample(Func&& f, Integrator&& integrator, const std::string f_name, c
 
     const std::string name = stre::pad_right(f_name, 25) + "   |   " + stre::pad_right(integrator_name, 25);
 
-    benchmark(name, [&]() { gse::ode::solve(f, y0, 0., T, callback, callback_frequency, integrator, false); });
+    benchmark(name, [&]() {
+        gse::ode::solve(f, y0, 0., T, callback, callback_frequency, integrator, false);
+        DO_NOT_OPTIMIZE_AWAY(sum);
+    });
 }
 
 #define BENCH_SAMPLE(f_, integrator_) bench_sample(f_, integrator_, #f_, #integrator_)
@@ -149,18 +152,19 @@ void benchmark_ode_solvers() {
     BENCH_SAMPLE(f_dynamic_struct, integrators::RK4<>{});
     BENCH_SAMPLE(f_dynamic_lambda, integrators::RK4<>{});
     BENCH_SAMPLE(f_dynamic_stdfun, integrators::RK4<>{});
-    // BENCH_SAMPLE(f_compile_struct, RK4_reuse_k<N>{});
-    // BENCH_SAMPLE(f_compile_lambda, RK4_reuse_k<N>{});
-    // BENCH_SAMPLE(f_compile_stdfun, RK4_reuse_k<N>{});
-    // BENCH_SAMPLE(f_dynamic_struct, RK4_reuse_k<>{});
-    // BENCH_SAMPLE(f_dynamic_lambda, RK4_reuse_k<>{});
-    // BENCH_SAMPLE(f_dynamic_stdfun, RK4_reuse_k<>{});
-    // BENCH_SAMPLE(f_compile_struct, RK4_naive<N>{});
-    // BENCH_SAMPLE(f_compile_lambda, RK4_naive<N>{});
-    // BENCH_SAMPLE(f_compile_stdfun, RK4_naive<N>{});
-    // BENCH_SAMPLE(f_dynamic_struct, RK4_naive<>{});
-    // BENCH_SAMPLE(f_dynamic_lambda, RK4_naive<>{});
-    // BENCH_SAMPLE(f_dynamic_stdfun, RK4_naive<>{});
+    
+    BENCH_SAMPLE(f_compile_struct, RK4_reuse_k<N>{});
+    BENCH_SAMPLE(f_compile_lambda, RK4_reuse_k<N>{});
+    BENCH_SAMPLE(f_compile_stdfun, RK4_reuse_k<N>{});
+    BENCH_SAMPLE(f_dynamic_struct, RK4_reuse_k<>{});
+    BENCH_SAMPLE(f_dynamic_lambda, RK4_reuse_k<>{});
+    BENCH_SAMPLE(f_dynamic_stdfun, RK4_reuse_k<>{});
+    BENCH_SAMPLE(f_compile_struct, RK4_naive<N>{});
+    BENCH_SAMPLE(f_compile_lambda, RK4_naive<N>{});
+    BENCH_SAMPLE(f_compile_stdfun, RK4_naive<N>{});
+    BENCH_SAMPLE(f_dynamic_struct, RK4_naive<>{});
+    BENCH_SAMPLE(f_dynamic_lambda, RK4_naive<>{});
+    BENCH_SAMPLE(f_dynamic_stdfun, RK4_naive<>{});
     
     bench.title("AdamsRK4");
     BENCH_SAMPLE(f_compile_struct, integrators::AdamsRK4<N>{});
