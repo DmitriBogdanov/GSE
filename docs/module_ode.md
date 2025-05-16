@@ -32,9 +32,9 @@ namespace defaults {
     constexpr Scalar tau                   = 1e-3;
     constexpr Scalar newton_precision      = 1e-12;
     constexpr Scalar newton_max_iterations = 100;
-    constexpr Scalar tau_min               = 1e-8;
+    constexpr Scalar tau_min               = 1e-6;
     constexpr Scalar tau_max               = 1e-1;
-    constexpr Scalar tolerance             = 1e-8;
+    constexpr Scalar tolerance             = 1e-6;
     constexpr Scalar fact                  = 0.7;
     constexpr Scalar factmin               = 0.7;
     constexpr Scalar factmax               = 1.5;
@@ -65,16 +65,16 @@ struct ImplicitBase : Base<N> {
 
 // - Integrators -
 // Non-stiff
-template <Extent N = dynamic_size> struct Euler    : Base<N>;
-template <Extent N = dynamic_size> struct RK2      : Base<N>;
-template <Extent N = dynamic_size> struct RK4      : Base<N>;
-template <Extent N = dynamic_size> struct AdamsRK4 : Base<N>;
+template <Extent N = dynamic_size> struct Euler  : Base<N>;
+template <Extent N = dynamic_size> struct RK2    : Base<N>;
+template <Extent N = dynamic_size> struct RK4    : Base<N>;
+template <Extent N = dynamic_size> struct Adams4 : Base<N>;
 // Non-stiff, adaptive
 template <Extent N = dynamic_size> struct RK4RE   : AdaptiveBase<N>;
 template <Extent N = dynamic_size> struct DOPRI45 : AdaptiveBase<N>;
 // Stiff
-template <Extent N = dynamic_size> struct TrapezoidalRule : ImplicitBase<N>;
 template <Extent N = dynamic_size> struct ImplicitEuler   : ImplicitBase<N>;
+template <Extent N = dynamic_size> struct TrapezoidalRule : ImplicitBase<N>;
 ```
 
 ## Methods
@@ -140,12 +140,8 @@ DESC:
 > This example uses [utl::json](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_json.md) for data export, this pairs really well using with [Mathematica](https://en.wikipedia.org/wiki/Wolfram_Mathematica) for visualization.
 
 [Harmonic oscillator](https://en.wikipedia.org/wiki/Harmonic_oscillator) is described by the following ODE system:
-$$
-\begin{cases}
-\dot{x} = v, \\\\
-\dot{v} = -\dfrac{k}{m}x
-\end{cases}
-$$
+
+$$ \begin{cases} \dot{x} = v, \\\\ \dot{v} = -\dfrac{k}{m}x \end{cases} $$
 
 Let's define $k/m = \sqrt{2}$ and set initial state to $x(0) = 1$, $v(0) = 0$.
 

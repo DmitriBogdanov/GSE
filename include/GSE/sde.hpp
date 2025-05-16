@@ -134,7 +134,7 @@ void solve(FuncA&&      A,                         // system RHS (deterministic 
            Scalar       t0,                        // time interval start
            Scalar       t1,                        // time interval end
            Callback&&   callback,                  // callback to export the result
-           Scalar       callback_frequency,        // how often to call 'callback'
+           Scalar       callback_frequency,        // how often to invoke 'callback'
            Integrator&& integrator = Integrator{}, // integration method
            bool         verify     = true,         // whether to test for divergence
            Gen&&        gen        = Gen{},        // underlying PRNG

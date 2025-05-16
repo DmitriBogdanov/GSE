@@ -15,13 +15,17 @@ void use_callable(Func&& f) { f(123); )
 
 ### Slowdown reason 1
 
-`std::function` is a type-erased callable, to perform type-erasure it need to have additional indirection internally.
+`std::function` is a type-erased callable, to perform type-erasure it needs to have additional indirection internally.
 
 This indirection introduces inherent overhead on each call, which in many cases ends up being significant.
 
 ### Slowdown reason 2
 
 Due to type-erasure `std::function` prevents compiler from trying to inline & optimize function that was passed as an argument.
+
+### Slowdown reason 3
+
+`std::funtion` might allocate when wrapping a functor with large state. Pass-by-forwarding-reference doesn't suffer from that.
 
 ## How `std` does it
 
@@ -42,6 +46,8 @@ void sort(RandomIt first, RandomIt last, Compare&& comp); // perfect
 ```
 
 This avoid copying and allows the exact same semantics.
+
+**Trivia:** `std` doesn't use perfect forwarding here due to legacy reasons. If `<algorithm>` was developed today it probably would.
 
 We could use other types of references, but that has significant downsides:
 

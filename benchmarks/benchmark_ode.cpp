@@ -167,12 +167,12 @@ void benchmark_ode_solvers() {
     BENCH_SAMPLE(f_dynamic_stdfun, RK4_naive<>{});
     
     bench.title("AdamsRK4");
-    BENCH_SAMPLE(f_compile_struct, integrators::AdamsRK4<N>{});
-    BENCH_SAMPLE(f_compile_lambda, integrators::AdamsRK4<N>{});
-    BENCH_SAMPLE(f_compile_stdfun, integrators::AdamsRK4<N>{});
-    BENCH_SAMPLE(f_dynamic_struct, integrators::AdamsRK4<>{});
-    BENCH_SAMPLE(f_dynamic_lambda, integrators::AdamsRK4<>{});
-    BENCH_SAMPLE(f_dynamic_stdfun, integrators::AdamsRK4<>{});
+    BENCH_SAMPLE(f_compile_struct, integrators::Adams4<N>{});
+    BENCH_SAMPLE(f_compile_lambda, integrators::Adams4<N>{});
+    BENCH_SAMPLE(f_compile_stdfun, integrators::Adams4<N>{});
+    BENCH_SAMPLE(f_dynamic_struct, integrators::Adams4<>{});
+    BENCH_SAMPLE(f_dynamic_lambda, integrators::Adams4<>{});
+    BENCH_SAMPLE(f_dynamic_stdfun, integrators::Adams4<>{});
     
     bench.title("RK4RE");
     BENCH_SAMPLE(f_compile_struct, integrators::RK4RE<N>{});

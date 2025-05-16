@@ -38,9 +38,9 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-// ====================
-// --- ODE Defaults ---
-// ====================
+// ================
+// --- Defaults ---
+// ================
 
 namespace gse::ode::defaults {
 
@@ -50,18 +50,18 @@ constexpr Scalar tau                   = 1e-3;
 constexpr Scalar newton_precision      = 1e-12;
 constexpr Scalar newton_max_iterations = 100;
 // Adaptive methods
-constexpr Scalar tau_min               = 1e-8;
+constexpr Scalar tau_min               = 1e-6;
 constexpr Scalar tau_max               = 1e-1;
-constexpr Scalar tolerance             = 1e-8;
+constexpr Scalar tolerance             = 1e-6;
 constexpr Scalar fact                  = 0.7;
 constexpr Scalar factmin               = 0.7;
 constexpr Scalar factmax               = 1.5;
 
 } // namespace gse::ode::defaults
 
-// =======================
-// --- ODE Integrators ---
-// =======================
+// ==================================
+// --- Integrator building blocks ---
+// ==================================
 
 namespace gse::ode::integrators {
 
@@ -89,13 +89,19 @@ struct AdaptiveBase : Base<N> {
     Scalar factmin   = defaults::factmin;   // usually in [0.2, 0.7] range, limits how fast 'tau' can shrink
     Scalar factmax   = defaults::factmax;   // usually in [1.5, 5.0] range, limits how fast 'tau' can grow
 
-    Scalar    err             = 0;
-    gse::Uint steps_taken     = 0;
-    gse::Uint steps_discarded = 0;
+    Scalar err = 0;
 };
 
-// --- Usable Integrators ---
-// --------------------------
+} // namespace gse::ode::integrators
+
+// ===================
+// --- Integrators ---
+// ===================
+
+namespace gse::ode::integrators {
+    
+// --- Non-stiff ---
+// -----------------
 
 // Euler
 // > Euler's explicit method
@@ -112,7 +118,7 @@ struct Euler : Base<N> {
 
 // RK4
 // > 4-th order Runge-Kutta method
-// > O(tau^4) | Explicit 
+// > O(tau^4) | Explicit
 template <Extent N = dynamic_size>
 struct RK4 : Base<N> {
 
@@ -127,7 +133,7 @@ struct RK4 : Base<N> {
 // > 4-th order Adams method with Runge-Kutta initialization
 // > O(tau^4) | Explicit | 4-step
 template <Extent N = dynamic_size>
-struct AdamsRK4 : Base<N> {
+struct Adams4 : Base<N> {
 
     template <class Func>
     void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
@@ -160,6 +166,9 @@ private:
     Vector<N> fm1, fm2, fm3, fm4;
 };
 
+// --- Non-stiff adaptive ---
+// --------------------------
+
 // RK4RE
 // > 4-th order Runge-Kutta method with Richardson Extrapolation & 5-th order approximation
 // > O(tau^5) | Explicit | Adaptive
@@ -191,14 +200,8 @@ struct RK4RE : AdaptiveBase<N> {
             this->tau *= std::clamp(tau_growth_factor, this->factmin, this->factmax);
             this->tau = std::clamp(this->tau, this->tau_min, this->tau_max);
 
-            // Record steps
-            if (this->err >= this->tolerance) {
-                ++this->steps_discarded;
-                continue;
-            } else {
-                ++this->steps_taken;
-                break;
-            }
+            // Throw away or take the step
+            if (this->err < this->tolerance || this->tau == this->tau_min) break;
         }
 
         y0 = y2 + (y2 - w) / (2. * 4 - 1); // (p + 1)-order approximation using a theorem
@@ -232,20 +235,17 @@ struct DOPRI45 : AdaptiveBase<N> {
             this->tau *= std::clamp(tau_growth_factor, this->factmin, this->factmax);
             this->tau = std::clamp(this->tau, this->tau_min, this->tau_max);
 
-            // Record steps
-            if (this->err >= this->tolerance) {
-                ++this->steps_discarded;
-                continue;
-            } else {
-                ++this->steps_taken;
-                break;
-            }
+            // Throw away or take the step
+            if (this->err < this->tolerance || this->tau == this->tau_min) break;
         };
 
         y0 = y_hat;
         t += this->tau;
     }
 };
+
+// --- Stiff ---
+// -------------
 
 // ImplicitEuler
 // > Euler's implicit method
@@ -314,7 +314,7 @@ void solve(Func&&       f,                         // system RHS
            Scalar       t0,                        // time interval start
            Scalar       t1,                        // time interval end
            Callback&&   callback,                  // callback to export the result
-           Scalar       callback_frequency,        // how often to call 'callback'
+           Scalar       callback_frequency,        // how often to invoke 'callback'
            Integrator&& integrator = Integrator{}, // integration method
            bool         verify     = true          // whether to test for divergence
 ) {
