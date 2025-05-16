@@ -1,23 +1,15 @@
-[<img src ="images/icon_cpp_std_17.svg">](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
-[<img src ="images/icon_license_mit.svg">](./LICENSE.md)
-[<img src ="images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
+|[<- to README.md](..) | |
+| - | - |
+|**Header** | [`#include "GSE/ode.hpp"`](https://github.com/DmitriBogdanov/GSE/blob/master/include/GSE/ode.hpp) |
+|**Namespace** | `gse::ode` |
+|**Contents** | [ODE](https://en.wikipedia.org/wiki/Ordinary_differential_equation) solvers and their building blocks |
 
-**Header:** [`#include "GSE/ode.hpp`](https://github.com/DmitriBogdanov/GSE/blob/master/include/GSE/ode.hpp)
+# gse::ode
 
-**Namespace:** `gse::ode::`
-
-[<- to README.md](..)
-
-# ODE module
-
-[ODE](https://en.wikipedia.org/wiki/Ordinary_differential_equation) module of the library, contains:
-
-- ODE solver
-- Stiff & non-stiff integrators
-- Building blocks for implementing custom integrators
+ODE solver module of the library. Includes solver function, ODE integration methods and some building blocks for custom integrators.
 
 > [!Tip]
-> Seeing [usage examples](#examples) first might be helpful.
+> Seeing [usage examples](#usage) first might be helpful.
 
 ## Definitions
 
@@ -73,16 +65,16 @@ struct ImplicitBase : Base<N> {
 
 // - Integrators -
 // Non-stiff
-template <Extent N = dynamic_size> struct Euler       : Base<N>;
-template <Extent N = dynamic_size> struct RK2         : Base<N>;
-template <Extent N = dynamic_size> struct RK4         : Base<N>;
-template <Extent N = dynamic_size> struct AdamsRK4    : Base<N>;
+template <Extent N = dynamic_size> struct Euler    : Base<N>;
+template <Extent N = dynamic_size> struct RK2      : Base<N>;
+template <Extent N = dynamic_size> struct RK4      : Base<N>;
+template <Extent N = dynamic_size> struct AdamsRK4 : Base<N>;
 // Non-stiff, adaptive
 template <Extent N = dynamic_size> struct RK4RE   : AdaptiveBase<N>;
 template <Extent N = dynamic_size> struct DOPRI45 : AdaptiveBase<N>;
 // Stiff
-template <Extent N = dynamic_size> struct Trapezoidal   : Base<N>;
-template <Extent N = dynamic_size> struct ImplicitEuler : Base<N>;
+template <Extent N = dynamic_size> struct TrapezoidalRule : ImplicitBase<N>;
+template <Extent N = dynamic_size> struct ImplicitEuler   : ImplicitBase<N>;
 ```
 
 ## Methods
@@ -97,19 +89,63 @@ DESC:
 
 ### Integrator building blocks
 
+> ```cpp
+> FUNC:
+> ```
+
+DESC:
+
+> ```cpp
+> FUNC:
+> ```
+
+DESC:
+
+> ```cpp
+> FUNC:
+> ```
+
+DESC:
+
+> ```cpp
+> FUNC:
+> ```
+
+DESC:
+
 ### Integrators
 
-## Examples
+> ```cpp
+> FUNC:
+> ```
+
+DESC:
+
+| Integrator        | Order | Stability | Adaptive | Explicit | Single-step | Stiff | Symplectic |
+| ----------------- | ----- | --------- | -------- | -------- | ----------- | ----- | ---------- |
+| `Euler`           | 1     |           | ✘        | ✔        | ✔           | ✘     | ✘          |
+| `RK2`             | 2     |           | ✘        | ✔        | ✔           | ✘     | ✘          |
+| `RK4`             | 4     |           | ✘        | ✔        | ✔           | ✘     | ✘          |
+| `AdamsRK4`        | 4     |           | ✔        | ✔        | ✘           | ✘     | ✘          |
+| `RK4RE`           | 5     |           | ✔        | ✔        | ✔           | ✘     | ✘          |
+| `DOPRI45`         | 5     |           | ✘        | ✔        | ✔           | ✘     | ✘          |
+| `ImplicitEuler`   | 1     | L         | ✘        | ✘        | ✔           | ✔     | ✘          |
+| `TrapezoidalRule` | 2     | A         | ✘        | ✘        | ✔           | ✔     | ✔          |
+
+## Usage
 
 ### Solving an ODE
 
 > [!Note]
->
 > This example uses [utl::json](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_json.md) for data export, this pairs really well using with [Mathematica](https://en.wikipedia.org/wiki/Wolfram_Mathematica) for visualization.
 
 [Harmonic oscillator](https://en.wikipedia.org/wiki/Harmonic_oscillator) is described by the following ODE system:
-
-$$\begin{cases} \dot{x} = v, \\ \dot{v} = -\dfrac{k}{m}x \end{cases}$$
+$$
+\begin{cases}
+\dot{x} = v, \\
+\dot{v} = -\dfrac{k}{m}x
+\end{cases}
+$$
 
 Let's define $k/m = \sqrt{2}$ and set initial state to $x(0) = 1$, $v(0) = 0$.
 
@@ -155,6 +191,23 @@ Solution graph:
 
 <img src ="images/ode_harmonic_oscillator.svg">
 
+Solution format:
+
+```json
+{
+    "solution": [
+        {
+            "t": 0,
+            "tau": 0.001,
+            "y": [ 0, 1 ]
+        },
+        // ... and so on
+    ]
+}
+```
+
+### Questions & answers
+
 **Q: What if system size is not known at compile time?**
 
 **A:** Use `gse::Vector<>` instead of `gse::Vector<N>`.
@@ -174,6 +227,10 @@ Solution graph:
 **Q: What if I prefer to use solver with Eigen3 vectors?**
 
 **A:** No problems with that, `gse::Vector<N>` is simply a typedef for `Eigen::Vector<double, N>`. See docs for the [core module]().
+
+**Q: Is there any good literature on the topic?**
+
+**A:** The classic choice would be `E. Hairer G. Wanner "Solving ordinary differential equations"`. The book is rather old, but it covers all the basic theory on numeric integration of ODEs.
 
 ### Creating custom integrator
 

@@ -19,6 +19,7 @@
 # > Scripts
 !*.txt
 !*.sh
+!*.wls
 # > Docs
 !*.md
 !*.svg

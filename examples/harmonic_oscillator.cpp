@@ -19,10 +19,10 @@ struct RK2 {
 
     template <class Func>
     void operator()(Func&& f, gse::Scalar& t, gse::Vector<N>& y0) {
-        
+
         this->k1 = f(t, y0);
         this->k2 = f(t + this->time_step, y0 + this->time_step * k1);
-        
+
         y0 += this->time_step * (0.5 * k1 + 0.5 * k2);
         t += this->time_step;
     }

@@ -99,7 +99,7 @@ struct AdaptiveBase : Base<N> {
 
 // Euler
 // > Euler's explicit method
-// > Explicit, O(tau)
+// > O(tau) | Explicit
 template <Extent N = dynamic_size>
 struct Euler : Base<N> {
 
@@ -110,26 +110,9 @@ struct Euler : Base<N> {
     }
 };
 
-// Euler
-// > Euler's semi-implicit method
-// > Implicit, O(tau)
-// > Symplectic (conserves energy)
-template <Extent N = dynamic_size>
-struct Trapezoidal : ImplicitBase<N> {
-    template <class Func>
-    void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
-        const auto implicit_equation = [&](const Vector<N>& yn) -> Vector<N> {
-            return yn - y0 - this->tau * 0.5 * (f(t + this->tau, yn) + f(t, y0));
-        };
-
-        y0 = alg::solve(implicit_equation, y0, this->newton_precision, this->newton_max_iterations);
-        t += this->tau;
-    }
-};
-
 // RK4
 // > 4-th order Runge-Kutta method
-// > Explicit, O(tau^4)
+// > O(tau^4) | Explicit 
 template <Extent N = dynamic_size>
 struct RK4 : Base<N> {
 
@@ -142,7 +125,7 @@ struct RK4 : Base<N> {
 
 // AdamsRK4
 // > 4-th order Adams method with Runge-Kutta initialization
-// > Explicit, 4-step, O(tau^4)
+// > O(tau^4) | Explicit | 4-step
 template <Extent N = dynamic_size>
 struct AdamsRK4 : Base<N> {
 
@@ -178,8 +161,8 @@ private:
 };
 
 // RK4RE
-// > 4-th order Runge-Kutta method with Richardson Extrapolation
-// > Explicit, adaptive, O(tau^5)
+// > 4-th order Runge-Kutta method with Richardson Extrapolation & 5-th order approximation
+// > O(tau^5) | Explicit | Adaptive
 template <Extent N = dynamic_size>
 struct RK4RE : AdaptiveBase<N> {
 
@@ -224,8 +207,8 @@ struct RK4RE : AdaptiveBase<N> {
 };
 
 // DOPRI45
-// > 4(5) Dormand-Prince (based on embedded 4/5-th order Runge-Kutta steps)
-// > Explicit, adaptive, O(tau^5)
+// > 4(5) Dormand-Prince (embedded 4/5-th order Runge-Kutta steps)
+// > O(tau^5) | Explicit | Adaptive,
 template <Extent N = dynamic_size>
 struct DOPRI45 : AdaptiveBase<N> {
 
@@ -260,6 +243,38 @@ struct DOPRI45 : AdaptiveBase<N> {
         };
 
         y0 = y_hat;
+        t += this->tau;
+    }
+};
+
+// ImplicitEuler
+// > Euler's implicit method
+// > O(tau) | L-stable | Implicit
+template <Extent N = dynamic_size>
+struct ImplicitEuler : ImplicitBase<N> {
+    template <class Func>
+    void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
+        const auto implicit_equation = [&](const Vector<N>& yn) -> Vector<N> {
+            return yn - y0 - this->tau * f(t + this->tau, yn);
+        };
+
+        y0 = alg::solve(implicit_equation, y0, this->newton_precision, this->newton_max_iterations);
+        t += this->tau;
+    }
+};
+
+// TrapezoidalRule
+// > Euler's semi-implicit method
+// > O(tau^2) | A-stable | Implicit | Symplectic
+template <Extent N = dynamic_size>
+struct TrapezoidalRule : ImplicitBase<N> {
+    template <class Func>
+    void operator()(Func&& f, Scalar& t, Vector<N>& y0) {
+        const auto implicit_equation = [&](const Vector<N>& yn) -> Vector<N> {
+            return yn - y0 - this->tau * 0.5 * (f(t + this->tau, yn) + f(t, y0));
+        };
+
+        y0 = alg::solve(implicit_equation, y0, this->newton_precision, this->newton_max_iterations);
         t += this->tau;
     }
 };
