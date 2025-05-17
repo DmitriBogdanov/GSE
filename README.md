@@ -50,7 +50,7 @@ The library aims to provide good performance for both small & large systems, thi
 ## See also
 
 - [Why use Eigen as a backend](./docs/guide_backend_motivation.md)
-- [How is gse::ode different from Boost.Odeint and SUNDIALS](./docs/guide_library_differences.md)
+- [How is GSE different from Boost.Odeint and SUNDIALS](./docs/guide_library_differences.md)
 - [How to use custom scalar types](./docs/guide_custom_scalar_types.md)
 - [How to contribute](./CONTRIBUTING.md)
 

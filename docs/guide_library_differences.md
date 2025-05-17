@@ -8,7 +8,7 @@
 
 ## Comparison table
 
-| Subject                                                      | **gse::ode**        | **Boost.Odeint**                | **SUNDIALS**        |
+| Subject                                                      | GSE     | **Boost.Odeint**                | **SUNDIALS**        |
 | ------------------------------------------------------------ | ------------------- | ------------------------------- | ------------------- |
 | Installation                                                 | 🟢 Header-only       | 🟡 Header-only with include path | 🔴 CMake             |
 | Project scale                                                | ⚫ Medium **⁽¹⁾**    | ⚫ Large **⁽¹⁾**                 | ⚫ Huge **⁽¹⁾**      |
@@ -22,8 +22,8 @@
 | [Algebraic](https://en.wikipedia.org/wiki/Nonlinear_system) solver selection | 🟡 Small             | 🔴 None                          | 🟢 Excellent         |
 | Arbitrary precision numbers                                  | 🟡 Policy **⁽²⁾**    | 🟢 Template **⁽²⁾**              | 🔴 None              |
 | Auto-differentiation                                         | 🔴 None              | 🔴 None                          | 🔴 None              |
-| SIMD compatibility                                           | 🟢 Excellent         | ⚫ Unknown **⁽³⁾ **               | 🟢 Excellent         |
-| OpenMP compatibility                                         | 🟢 Excellent **⁽⁴⁾** | 🟢 Good                          | ⚫ Unknown **⁽³⁾ **   |
+| SIMD compatibility                                           | 🟢 Excellent         | ⚫ Unknown **⁽³⁾**               | 🟢 Excellent         |
+| OpenMP compatibility                                         | 🟢 Excellent **⁽⁴⁾** | 🟢 Good                          | ⚫ Unknown **⁽³⁾**   |
 | MPI compatibility                                            | 🔴 None              | 🟢 Good                          | 🟢 Excellent         |
 | GPU compatibility                                            | 🔴 None              | 🟢 Good                          | 🟢 Excellent         |
 
