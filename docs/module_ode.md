@@ -208,13 +208,21 @@ Solution format:
 
 **A:** Use `gse::Vector<>` instead of `gse::Vector<N>`.
 
-**Q: What if system is stiff?**
+**Q: What if I'm dealing with a stiff system?**
 
 **A:** Use stiff integrators (`ImplicitEuler`, `TrapezoidalRule`, ...).
 
-**Q: What if system is dynamic & needs to preserve energy?**
+**Q: What if I'm dealing with a dynamic system that needs to preserve energy?**
 
 **A:** Use symplectic integrators (...).
+
+**Q: What if I'm dealing with a higher order ODE?**
+
+**A:** Any high order ODE can be rewritten as a 1st-order system with components corresponding to higher order derivatives.
+
+**Q: What if I'm dealing with complex numbers?**
+
+**A:** Any complex system can be rewritten as a real system by splitting real and imaginary components.
 
 **Q: What if I want to use integration method that isn't present in this library?**
 
@@ -223,6 +231,10 @@ Solution format:
 **Q: What if I prefer to use solver with Eigen3 vectors?**
 
 **A:** No problems with that, `gse::Vector<N>` is simply a typedef for `Eigen::Vector<double, N>`. See docs for the [core module]().
+
+**Q: What if I want to use different precision?**
+
+**A:** Precision can be switched globally by defining a policy, see [corresponding guide](./guide_custom_scalar_types.md).
 
 **Q: Is there any good literature on the topic?**
 

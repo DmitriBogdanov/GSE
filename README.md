@@ -15,7 +15,7 @@ built on top of [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) l
 The whole library is header-only and can be found [here](include/).
 
 > [!Warning]
-> As of now, the library is **heavily** work-in-progress, not all functionality is fully implemented.
+> As of now, the library is **work-in-progress**, it contains the core functionality and documentation, but there is plenty of work left to be done. **Contributions are welcome**, see [contribution guide](./CONTRIBUTING.md).
 
 ## Design Principles
 
@@ -49,10 +49,10 @@ The library aims to provide good performance for both small & large systems, thi
 
 ## See also
 
-- [Why use Eigen as a backend]()
+- [Why use Eigen as a backend](./docs/guide_backend_motivation.md)
 - [How is gse::ode different from Boost.Odeint and SUNDIALS](./docs/guide_library_differences.md)
-- [How to use custom scalar types]()
-- [How to contribute]()
+- [How to use custom scalar types](./docs/guide_custom_scalar_types.md)
+- [How to contribute](./CONTRIBUTING.md)
 
 ## Work in progress
 

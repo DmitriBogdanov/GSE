@@ -31,13 +31,13 @@ namespace gse {
 // --- Basic Types ---
 // ===================
 
-using impl::dynamic_size;
-using impl::Extent;
 using impl::Idx;
-using impl::Matrix;
-using impl::Scalar;
 using impl::Uint;
+using impl::Extent;
+using impl::dynamic_size;
+using impl::Scalar;
 using impl::Vector;
+using impl::Matrix;
 
 // ==============================
 // --- Initializing functions ---
