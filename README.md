@@ -43,9 +43,9 @@ The library aims to provide good performance for both small & large systems, thi
 
 - **SIMD support.** By the virtue of using Eigen backend we can fully benefit from its [vectorization capacity](http://eigen.tuxfamily.org/index.php?title=FAQ#Vectorization) without mudding the source code with intrinsics. As of 2025 Eigen supports SSE, AVX, AVX2, AVX512, AltiVec/VSX, ARM NEON and S390x SIMD.
 
-- **OpenMP support.** Since most of the solver logic can be expressed though Eigen's matrix operations, we also benefit from its [multi-threading support](https://eigen.tuxfamily.org/dox/TopicMultiThreading.html) based on [OpenMP](https://en.wikipedia.org/wiki/OpenMP).
+- **Multi-threading support.** Since most of the solver logic can be expressed though Eigen's matrix operations, we also benefit from its [multi-threading support](https://eigen.tuxfamily.org/dox/TopicMultiThreading.html) based on [OpenMP](https://en.wikipedia.org/wiki/OpenMP).
 
-- **Fast random.** Stochastic solvers benefit greatly from using efficient [PRNGs](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) and distribution implementations. Significant work on this front has been done in [utl::random](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_random.md) which is partially included here to provide fast RNG defaults.
+- **Fast random.** Stochastic solvers benefit greatly from using efficient [PRNGs](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) and distribution implementations. Significant work on this front has been done in [utl::random](https://github.com/DmitriBogdanov/UTL/blob/master/docs/module_random.md) which is partially included here to provide fast RNG defaults. This aspect of modeling is frequently neglected.
 
 ## See also
 

@@ -12,8 +12,10 @@
 | ------------------------------------------------------------ | ------------------- | ------------------------------- | ------------------- |
 | Installation                                                 | 🟢 Header-only       | 🟡 Header-only with include path | 🔴 CMake             |
 | Project scale                                                | ⚫ Medium **⁽¹⁾**    | ⚫ Large **⁽¹⁾**                 | ⚫ Huge **⁽¹⁾**      |
+| Target use case | ⚫ Research | ⚫ Research & HPC | ⚫ HPC |
 | API complexity                                               | 🟢 Simple **⁽¹⁾**    | 🟡 Simple-to-complex **⁽¹⁾**     | 🔴 Complex **⁽¹⁾**   |
-| API flexibility **⁽¹⁾**                                      | 🟢 Good **⁽¹⁾**      | 🟢 Good **⁽¹⁾**                  | 🟢 Excellent **⁽¹⁾** |
+| API flexibility                                      | 🟢 Good **⁽¹⁾**      | 🟢 Good **⁽¹⁾**                  | 🟢 Excellent **⁽¹⁾** |
+| Linear algebra | 🟢 Built-in | 🔴 None | 🟢 Built-in |
 | [ODE](https://en.wikipedia.org/wiki/Ordinary_differential_equation) solver selection | 🟡 Small             | 🟢 Excellent                     | 🟢 Good              |
 | [SDE](https://en.wikipedia.org/wiki/Stochastic_differential_equation) solver selection | 🟡 Small             | 🔴 None                          | 🔴 None              |
 | [DAE](https://en.wikipedia.org/wiki/Differential-algebraic_system_of_equations) solver selection | 🔴 None              | 🔴 None                          | 🟢 Excellent         |
@@ -27,7 +29,7 @@
 
 > [!Note]
 >
-> **(1)** Subjective metrics. **⁽²⁾** | **⁽³⁾ ** | **⁽⁴⁾**
+> **(1)** Subjective metrics.
 >
 > **(2)** GSE uses global policy-based approach to scalar types, this is convenient for small projects as it simplifies the API, but template-based approach of Boost.Odeint is more generic.
 >

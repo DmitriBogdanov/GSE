@@ -22,7 +22,3 @@ MaxEmptyLinesToKeep: 6
 PointerAlignment: Left
 SpacesInContainerLiterals: false
 TabWidth: 4
-WhitespaceSensitiveMacros:
-  - _utl_require # aren't really whitespace sensitive, but otherwise formatter aligns boolean && weirdly
-StatementMacros:
-  - _utl_reqs
