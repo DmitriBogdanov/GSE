@@ -17,7 +17,7 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Numerical jacobian evaluation.
+// Numerical derivative evaluation.
 //
 // Solver doesn't do much beyond wrapping the method.
 
@@ -27,41 +27,41 @@
 // --- Defaults ---
 // ================
 
-namespace gse::impl::jacobian::defaults {
+namespace gse::impl::derivative::defaults {
 
-using jacobian_method = method::CentralDifference;
+using derivative_method = method::CentralDifference;
 
-} // namespace gse::impl::jacobian::defaults
+} // namespace gse::impl::derivative::defaults
 
 // ==============
 // --- SFINAE ---
 // ==============
 
-namespace gse::impl::jacobian {
+namespace gse::impl::derivative {
 
 template <class T, Extent N, class Func, class Method>
-using require_valid_method = require_invocable_r<Matrix<T, N, N>, Method, Func, Vector<T, N>>;
+using require_valid_method = require_invocable_r<T, Method, Func, T>;
 
-} // namespace gse::impl::jacobian
+} // namespace gse::impl::derivative
 
 // ==============
 // --- Solver ---
 // ==============
 
-namespace gse::impl::jacobian {
+namespace gse::impl::derivative {
 
-// Compute jacobian of a vector function:
-//    f: R^N -> R^N
+// Compute gradient of a multi-variate scalar function:
+//    f: R^N -> R
 //
 // here:
-//    'f'              - vector-function,
+//    'f'              - multi-variate scalar function,
 //    'x'              - evaluation point,
 //    'method'         - numerical differentiation method.
 //
-template <class T, Extent N, class Func, class Method = defaults::jacobian_method,
-          require_vector_function<T, N, Func> = true, require_valid_method<T, N, Func, Method> = true>
-Matrix<T, N, N> solve(Func&& f, const Vector<T, N>& x, Method method = Method{}) {
+template <class T, Extent N, class Func, class Method = defaults::derivative_method,
+          require_scalar_function<T, N, Func> = true, require_valid_method<T, N, Func, Method> = true>
+T solve(Func&& f, T x, Method method = Method{}) {
     return method(f, x);
 }
 
-} // namespace gse::impl::jacobian
+} // namespace gse::impl::derivative

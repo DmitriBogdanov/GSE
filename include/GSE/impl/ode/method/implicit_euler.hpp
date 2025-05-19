@@ -12,6 +12,7 @@
 
 #include <utility> // pair<>
 
+#include "../../core/traits.hpp"
 #include "../../core/types.hpp"
 #include "../../nonlinear/solver.hpp"
 
@@ -38,7 +39,7 @@ namespace gse::impl::ode::method {
 template <class T, class NonlinearMethod = nonlinear::defaults::nonlinear_method>
 struct ImplicitEuler : base::Implicit<T> {
 
-    template <Extent N, class Func>
+    template <Extent N, class Func, require_time_vector_function<T, N, Func> = true>
     std::pair<T, Vector<T, N>> operator()(Func&& f, T t, Vector<T, N> y0) {
         const T tau = this->time_step;
 

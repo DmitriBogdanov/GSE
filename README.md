@@ -6,11 +6,11 @@
 
 **GSE** is a highly flexible numerical library for:
 
-- [Solving linear systems](https://en.wikipedia.org/wiki/Linear_system)
-- [Solving non-linear systems](https://en.wikipedia.org/wiki/Nonlinear_system)
-- [Computing numerical jacobians](https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant)
-- [Solding ordinary differential equations (ODEs)](https://en.wikipedia.org/wiki/Ordinary_differential_equation)
-- [Solving stochastic differential equations (SDEs)](https://en.wikipedia.org/wiki/Stochastic_differential_equation)
+- Solving [linear systems](https://en.wikipedia.org/wiki/Linear_system)
+- Solving [non-linear systems](https://en.wikipedia.org/wiki/Nonlinear_system)
+- Computing numerical [derivatives](https://en.wikipedia.org/wiki/Numerical_differentiation), [gradients](https://en.wikipedia.org/wiki/Gradient) and [jacobians](https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant)
+- Solving [ordinary differential equations (ODEs)](https://en.wikipedia.org/wiki/Ordinary_differential_equation)
+- Solving [stochastic differential equations (SDEs)](https://en.wikipedia.org/wiki/Stochastic_differential_equation)
 
 built on top of [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) linear algebra functionality.
 
@@ -28,14 +28,16 @@ The whole library is header-only and can be found [here](include/).
 
 ## Documentation
 
-| Module                                           | Short description                        |
-| ------------------------------------------------ | ---------------------------------------- |
-| [**gse::core**](./docs/module_core.md)           | Core typedefs                            |
-| [**gse::linear**](./docs/module_linear.md)       | Linear system solvers                    |
-| [**gse::nonlinear**](./docs/module_nonlinear.md) | Non-linear system solvers                |
-| [**gse::jacobian**](./docs/module_jacobian.md)   | Numerical Jacobian computation           |
-| [**gse::ode**](./docs/module_ode.md)             | Ordinary differential equation solvers   |
-| [**gse::sde**](./docs/module_sde.md)             | Stochastic differential equation solvers |
+| Module                                             | Short description                        |
+| -------------------------------------------------- | ---------------------------------------- |
+| [**gse::core**](./docs/module_core.md)             | Core typedefs                            |
+| [**gse::linear**](./docs/module_linear.md)         | Linear system solvers                    |
+| [**gse::nonlinear**](./docs/module_nonlinear.md)   | Non-linear system solvers                |
+| [**gse::derivative**](./docs/module_derivative.md) | Numerical derivative computation         |
+| [**gse::gradient**](./docs/module_gradient.md)     | Numerical gradient computation           |
+| [**gse::jacobian**](./docs/module_jacobian.md)     | Numerical Jacobian computation           |
+| [**gse::ode**](./docs/module_ode.md)               | Ordinary differential equation solvers   |
+| [**gse::sde**](./docs/module_sde.md)               | Stochastic differential equation solvers |
 
 ## Performance
 
@@ -61,8 +63,11 @@ The library aims to provide good performance for both small & large systems, thi
 
 - Documentation
 - Non-linear algebraic API improvements
-- More ODE integrators
-- More SDE integrators
+- More derivative, gradient and jacobian methods
+- More non-linear methods
+- More ODE methods
+- More SDE methods
+- Single- and multi-variate optimization module
 - CMake cleanup
 
 ## Requirements

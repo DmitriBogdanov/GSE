@@ -12,7 +12,7 @@
 
 #include <cstdint>     // uint32_t
 #include <functional>  // function<>
-#include <type_traits> // enable_if_t<>, is_invocable<>, is_invocable_r<>, is_convertible<>
+#include <type_traits> // enable_if_t<>, is_invocable<>, is_invocable_r<>, is_convertible<>, is_arithmetic<>, ...
 #include <utility>     // declval<>()
 
 #include "./types.hpp"
@@ -77,7 +77,8 @@ struct signature_of_callable_impl<std::function<R(Args...)>> {
 };
 
 template <class Func>
-using signature_of_callable_t = typename signature_of_callable_impl<decltype(std::function(std::declval<Func>()))>::type;
+using signature_of_callable_t =
+    typename signature_of_callable_impl<decltype(std::function(std::declval<Func>()))>::type;
 
 // Type deduction:
 //    signature_type -> return_type
@@ -128,6 +129,29 @@ using require_not_invocable = require<!std::is_invocable_v<T, Args...>>;
 
 template <class Ret, class T, class... Args>
 using require_invocable_r = require<std::is_invocable_r_v<Ret, T, Args...>>;
+
+template <class T>
+using require_arithmetic = require<std::is_arithmetic_v<T>>;
+
+template <class T>
+using require_floating_point = require<std::is_floating_point_v<T>>;
+
+// --- Function signature checks ---
+// ---------------------------------
+
+// We use these in a lot of solvers so it makes sense to create shortcuts
+
+template <class T, Extent N, class Func>
+using require_vector_function = require_invocable_r<Vector<T, N>, Func, Vector<T, N>>;
+
+template <class T, Extent N, class Func>
+using require_multivariate_function = require_invocable_r<T, Func, Vector<T, N>>;
+
+template <class T, Extent N, class Func>
+using require_scalar_function = require_invocable_r<T, Func, T>;
+
+template <class T, Extent N, class Func>
+using require_time_vector_function = require_invocable_r<Vector<T, N>, Func, T, Vector<T, N>>;
 
 // ==============================
 // --- Vector-specific traits ---

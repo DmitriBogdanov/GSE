@@ -12,6 +12,7 @@
 
 #include <utility> // pair<>
 
+#include "../../core/traits.hpp"
 #include "../../core/types.hpp"
 
 #include "./base.hpp"
@@ -37,15 +38,15 @@ namespace gse::impl::ode::method {
 template <class T>
 struct Euler : base::Common<T> {
 
-    template <Extent N, class Func>
+    template <Extent N, class Func, require_time_vector_function<T, N, Func> = true>
     std::pair<T, Vector<T, N>> operator()(Func&& f, T t, Vector<T, N> y0) {
         const T tau = this->time_step;
-        
+
         y0 += tau * f(t, y0);
         t += tau;
-        
-        return { t, std::move(y0) };
+
+        return {t, std::move(y0)};
     }
 };
 
-} // namespace gse::XXXXXXXXXXXX
+} // namespace gse::impl::ode::method

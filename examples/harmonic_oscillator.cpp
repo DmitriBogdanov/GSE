@@ -1,4 +1,5 @@
 #include "GSE/core.hpp"
+#include "GSE/impl/linear/method/bi_cg_stab.hpp"
 #include "GSE/jacobian.hpp"
 #include "GSE/linear.hpp"
 #include "GSE/nonlinear.hpp"
@@ -39,7 +40,7 @@ void neat_example() {
         Scalar,
         nonlinear::method::Newton<
             jacobian::method::CentralDifference,
-            linear::method::FullPivotLU
+            linear::method::BiCGSTAB
         >
     >;
 
@@ -71,13 +72,15 @@ int main() {
     // (optional) Select integrator
     using integrator_type = gse::ode::method::SymplecticEuler<
         Scalar,
-        gse::nonlinear::method::Newton<gse::jacobian::method::CentralDifference, gse::linear::method::FullPivotLU>>;
+        gse::nonlinear::method::Newton<gse::jacobian::method::CentralDifference, gse::linear::method::BiCGSTAB>>;
 
     integrator_type method;
-    method.time_step = 1e-3;
+    method.time_step = 1e-6;
 
     // Solve for 't' in [0, 10], export results at 100 time layers
+    utl::time::Stopwatch watch;
     gse::ode::solve(f, y0, t0, t1, callback, method);
+    utl::log::println(watch.elapsed_string());
 
     json.to_file("temp/harmonic_oscillator.json");
 }

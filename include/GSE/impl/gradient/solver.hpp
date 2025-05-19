@@ -17,7 +17,7 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Numerical jacobian evaluation.
+// Numerical gradient evaluation.
 //
 // Solver doesn't do much beyond wrapping the method.
 
@@ -27,41 +27,41 @@
 // --- Defaults ---
 // ================
 
-namespace gse::impl::jacobian::defaults {
+namespace gse::impl::gradient::defaults {
 
-using jacobian_method = method::CentralDifference;
+using gradient_method = method::CentralDifference;
 
-} // namespace gse::impl::jacobian::defaults
+} // namespace gse::impl::gradient::defaults
 
 // ==============
 // --- SFINAE ---
 // ==============
 
-namespace gse::impl::jacobian {
+namespace gse::impl::gradient {
 
 template <class T, Extent N, class Func, class Method>
-using require_valid_method = require_invocable_r<Matrix<T, N, N>, Method, Func, Vector<T, N>>;
+using require_valid_method = require_invocable_r<Vector<T, N>, Method, Func, Vector<T, N>>;
 
-} // namespace gse::impl::jacobian
+} // namespace gse::impl::gradient
 
 // ==============
 // --- Solver ---
 // ==============
 
-namespace gse::impl::jacobian {
+namespace gse::impl::gradient {
 
-// Compute jacobian of a vector function:
-//    f: R^N -> R^N
+// Compute gradient of a multi-variate scalar function:
+//    f: R^N -> R
 //
 // here:
-//    'f'              - vector-function,
+//    'f'              - multi-variate scalar function,
 //    'x'              - evaluation point,
 //    'method'         - numerical differentiation method.
 //
-template <class T, Extent N, class Func, class Method = defaults::jacobian_method,
-          require_vector_function<T, N, Func> = true, require_valid_method<T, N, Func, Method> = true>
-Matrix<T, N, N> solve(Func&& f, const Vector<T, N>& x, Method method = Method{}) {
+template <class T, Extent N, class Func, class Method = defaults::gradient_method,
+          require_multivariate_function<T, N, Func> = true, require_valid_method<T, N, Func, Method> = true>
+Vector<T, N> solve(Func&& f, const Vector<T, N>& x, Method method = Method{}) {
     return method(f, x);
 }
 
-} // namespace gse::impl::jacobian
+} // namespace gse::impl::gradient

@@ -47,9 +47,6 @@ constexpr T max_iterations = is_float_v<T> ? 80 : 100;
 
 namespace gse::impl::nonlinear {
 
-template <class T, Extent N, class Func>
-using require_valid_func = require_invocable_r<Vector<T, N>, Func, Vector<T, N>>;
-
 template <class T, Extent N, class Func, class Method>
 using require_valid_method = require_invocable_r<Vector<T, N>, Method, Func, Vector<T, N>>;
 
@@ -71,7 +68,7 @@ namespace gse::impl::nonlinear {
 //    'max_iterations' - max number of nonlinear iterations,
 //    'method'         - method of nonlinear iteration.
 //
-template <class T, Extent N, class Func, class Method = method::Newton<>, require_valid_func<T, N, Func> = true,
+template <class T, Extent N, class Func, class Method = method::Newton<>, require_vector_function<T, N, Func> = true,
           require_valid_method<T, N, Func, Method> = true>
 Vector<T, N> solve(Func&&       f,                                            //
                    Vector<T, N> x0,                                           //

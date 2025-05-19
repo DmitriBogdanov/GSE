@@ -52,9 +52,6 @@ namespace gse::impl::ode {
 // SFINAE helpers to validate callable signatures.
 // In this case this isn't just a good general practice, it is necessary
 // to avoid the ambiguity between some template overloads of 'solve()'
-template <class T, Extent N, class Func>
-using require_valid_func = require_invocable_r<Vector<T, N>, Func, T, Vector<T, N>>;
-
 template <class T, Extent N, class Callback, class Method>
 using require_valid_callback = require_invocable<Callback, T, Vector<T, N>, Method>;
 
@@ -83,7 +80,7 @@ namespace gse::impl::ode {
 // Minimalistic overload with only integration & end result.
 //
 template <class T, Extent N, class Func, class Method = defaults::ode_method<T>,
-          require_valid_func<T, N, Func>           = true, //
+          require_time_vector_function<T, N, Func> = true, //
           require_valid_method<T, N, Func, Method> = true  //
           >
 Vector<T, N> solve(Func&&              f,                //
@@ -114,7 +111,7 @@ Vector<T, N> solve(Func&&              f,                //
 // Overload with callback & manual frequency.
 //
 template <class T, Extent N, class Func, class Callback, class Method = defaults::ode_method<T>,
-          require_valid_func<T, N, Func>                 = true, //
+          require_time_vector_function<T, N, Func>       = true, //
           require_valid_callback<T, N, Callback, Method> = true, //
           require_valid_method<T, N, Func, Method>       = true  //
           >
@@ -161,7 +158,7 @@ Vector<T, N> solve(Func&&              f,                  //
 // Overload with callback & automatic frequency.
 //
 template <class T, Extent N, class Func, class Callback, class Method = defaults::ode_method<T>,
-          require_valid_func<T, N, Func>                 = true, //
+          require_time_vector_function<T, N, Func>       = true, //
           require_valid_callback<T, N, Callback, Method> = true, //
           require_valid_method<T, N, Func, Method>       = true  //
           >

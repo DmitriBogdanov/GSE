@@ -10,7 +10,10 @@
 
 // _______________________ INCLUDES _______________________
 
+#include <limits> // numeric_limits<>::epsilon()
+
 #include "../../core/init.hpp"
+#include "../../core/math.hpp"
 #include "../../core/traits.hpp"
 #include "../../core/types.hpp"
 
@@ -18,22 +21,23 @@
 
 // Numerical jacobian evaluation method. Uses central finite difference.
 //    Error: O(h^2)
-//    Cost:  2N 'f(x)' evaluations
+//    Cost:  2N 'f(x)' evaluations (~ 2N^2 non-linear coef evaluations)
 
 // ____________________ IMPLEMENTATION ____________________
 
 namespace gse::impl::jacobian::method {
 
 struct CentralDifference {
-    template <class T, Extent N, class Func>
+    
+    template <class T, Extent N, class Func, require_vector_function<T, N, Func> = true>
     Matrix<T, N, N> operator()(Func&& f, const Vector<T, N>& x) {
-        constexpr T eps         = is_float_v<T> ? 0.00492157 : 6.05545e-6;
-        constexpr T two_eps_inv = 1 / (2 * eps);
+        constexpr T h       = math::cbrt(std::numeric_limits<T>::epsilon());
+        constexpr T inv_2_h = 1 / (2 * h);
         // for central differences optimal step size is a cube root of machine epsilon,
         // see https://en.wikipedia.org/wiki/Numerical_differentiation
 
-        Vector<T, N>    dxj = x;
-        Matrix<T, N, N> J   = init::zero<T, N, N>(x.rows(), x.rows());
+        Vector<T, N>    x_plus_dxj = x;
+        Matrix<T, N, N> J          = init::zero<T, N, N>(x.rows(), x.rows());
 
         for (Idx j = 0; j < J.cols(); ++j) {
             // Each pair of 'f' invocations gives us a single column of the jacobian
@@ -44,17 +48,17 @@ struct CentralDifference {
             // where 'dxj' is a vector with '0' everywhere and 'half_diff_eps' on index 'j',
             // we rearrange things a bit to reduce allocations
 
-            dxj[j] += eps;
-            J.col(j) += f(dxj);
-            dxj[j] = x[j];
+            x_plus_dxj[j] += h;
+            J.col(j) += f(x_plus_dxj);
+            x_plus_dxj[j] = x[j];
 
-            dxj[j] -= eps;
-            J.col(j) -= f(dxj);
-            dxj[j] = x[j];
+            x_plus_dxj[j] -= h;
+            J.col(j) -= f(x_plus_dxj);
+            x_plus_dxj[j] = x[j];
 
-            J.col(j) *= two_eps_inv;
+            J.col(j) *= inv_2_h;
         }
-        
+
         return J;
     }
 };

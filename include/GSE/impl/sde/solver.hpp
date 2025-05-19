@@ -61,9 +61,6 @@ namespace gse::impl::sde {
 // SFINAE helpers to validate callable signatures.
 // In this case this isn't just a good general practice, it is necessary
 // to avoid the ambiguity between some template overloads of 'solve()'
-template <class T, Extent N, class Func>
-using require_valid_func = require_invocable_r<Vector<T, N>, Func, T, Vector<T, N>>;
-
 template <class T, Extent N, class Callback, class Method>
 using require_valid_callback = require_invocable<Callback, T, Vector<T, N>, Method>;
 
@@ -97,8 +94,8 @@ namespace gse::impl::sde {
 //
 template <class T, Extent N, class FuncA, class FuncB, class Method = defaults::sde_method<T>,
           class Gen = defaults::generator, class Dist = defaults::normal_distribution<T>,
-          require_valid_func<T, N, FuncA>                             = true, //
-          require_valid_func<T, N, FuncB>                             = true, //
+          require_time_vector_function<T, N, FuncA>                   = true, //
+          require_time_vector_function<T, N, FuncB>                   = true, //
           require_valid_method<T, N, FuncA, FuncB, Gen, Dist, Method> = true  //
           >
 Vector<T, N> solve(FuncA&&             A,                 //
@@ -136,8 +133,8 @@ Vector<T, N> solve(FuncA&&             A,                 //
 //
 template <class T, Extent N, class FuncA, class FuncB, class Callback, class Method = defaults::sde_method<T>,
           class Gen = defaults::generator, class Dist = defaults::normal_distribution<T>,
-          require_valid_func<T, N, FuncA>                             = true, //
-          require_valid_func<T, N, FuncB>                             = true, //
+          require_time_vector_function<T, N, FuncA>                   = true, //
+          require_time_vector_function<T, N, FuncB>                   = true, //
           require_valid_callback<T, N, Callback, Method>              = true, //
           require_valid_method<T, N, FuncA, FuncB, Gen, Dist, Method> = true  //
           >
@@ -188,8 +185,8 @@ Vector<T, N> solve(FuncA&&             A,                  //
 //
 template <class T, Extent N, class FuncA, class FuncB, class Callback, class Method = defaults::sde_method<T>,
           class Gen = defaults::generator, class Dist = defaults::normal_distribution<T>,
-          require_valid_func<T, N, FuncA>                             = true, //
-          require_valid_func<T, N, FuncB>                             = true, //
+          require_time_vector_function<T, N, FuncA>                   = true, //
+          require_time_vector_function<T, N, FuncB>                   = true, //
           require_valid_callback<T, N, Callback, Method>              = true, //
           require_valid_method<T, N, FuncA, FuncB, Gen, Dist, Method> = true  //
           >

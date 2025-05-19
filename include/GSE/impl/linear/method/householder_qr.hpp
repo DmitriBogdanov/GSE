@@ -14,19 +14,19 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Numerical direct SLAE-solving method. Uses partial pivot LU decomposition from Eigen.
+// Numerical direct SLAE-solving method. Uses QR-decomposition from Eigen based on Householder reflections.
 //
-// Best method for a general choice.
+// Slower than partial pivot LU, but faster than full pivot LU.
 
 // ____________________ IMPLEMENTATION ____________________
 
 namespace gse::impl::linear::method {
 
-struct PartialPivotLU {
+struct HouseholderQR {
     
     template <class T, Extent N>
     Vector<T, N> operator()(const Matrix<T, N, N>& A, const Vector<T, N>& b) {
-        return A.partialPivLu().solve(b);
+        return A.householderQr().solve(b);
     }
 };
 

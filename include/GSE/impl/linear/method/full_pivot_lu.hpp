@@ -15,12 +15,15 @@
 // ____________________ DEVELOPER DOCS ____________________
 
 // Numerical direct SLAE-solving method. Uses full pivot LU decomposition from Eigen.
+//
+// Trades partial pivot LU performance for more accuracy. 
 
 // ____________________ IMPLEMENTATION ____________________
 
 namespace gse::impl::linear::method {
 
 struct FullPivotLU {
+    
     template <class T, Extent N>
     Vector<T, N> operator()(const Matrix<T, N, N>& A, const Vector<T, N>& b) {
         return A.fullPivLu().solve(b);

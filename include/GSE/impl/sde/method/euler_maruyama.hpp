@@ -14,6 +14,7 @@
 #include <utility> // pair<>
 
 #include "../../core/init.hpp"
+#include "../../core/traits.hpp"
 #include "../../core/types.hpp"
 
 #include "./base.hpp"
@@ -41,7 +42,8 @@ namespace gse::impl::sde::method {
 template <class T>
 struct EulerMaruyama : base::Common<T> {
 
-    template <Extent N, class FuncA, class FuncB, class Gen, class Dist>
+    template <Extent N, class FuncA, class FuncB, class Gen, class Dist,
+              require_time_vector_function<T, N, FuncA> = true, require_time_vector_function<T, N, FuncB> = true>
     std::pair<T, Vector<T, N>> operator()(FuncA&& A, FuncB&& B, Gen& gen, Dist& dist, T t, Vector<T, N> y0) {
         const T tau      = this->time_step;
         const T sqrt_tau = std::sqrt(tau);

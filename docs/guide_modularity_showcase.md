@@ -14,7 +14,7 @@ For example, let's say we want to define a custom ODE integrator which should:
 Defining such integrator is as simple as composing it from corresponding templates:
 
 ```cpp
-using ode_integrator = ode::method::SymplecticEuler<
+using custom_ode_integrator = ode::method::SymplecticEuler<
     double,
     nonlinear::method::Newton<
         jacobian::method::CentralDifference,
@@ -32,7 +32,9 @@ This approach applies to **all** methods in the library, making it extremely eas
 
 Modularity comes into play when we want to configure something due to our knowledge of the problem, for example:
 
-- If we know system jacobian changes relatively smooth, we might want to select a faster differentiation method
-- When we're dealing with a particularly stiff system, we might want to use a more numerically stable linear solver
-- If we're using a 3rd party library that provides custom random numbers and distributions, we might want to use them instead of standard ones
-- If this library doesn't contain some specific method that we need, it is trivially easy to implement it as a compatible building block and insert it into a general solver
+- If we know system jacobian changes relatively smoothly, we might want to select a faster differentiation method
+- If we're dealing with a particularly stiff system, we might want to more expensive, but numerically stable methods for internal steps
+- If we know some internal matrix is going to be positive-definite, we can use a faster linear solver for it (like [Cholesky LLT](https://en.wikipedia.org/wiki/Cholesky_decomposition))
+- If we're using a 3rd party library that provides custom random numbers and distributions, we might want to use them instead of standard ones when solving SDEs
+- If this library doesn't contain some specific method that we need, it is trivially easy to implement it as a stand-alone building block and insert it into a general solver
+

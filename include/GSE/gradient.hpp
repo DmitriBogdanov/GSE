@@ -10,24 +10,19 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "../../core/types.hpp"
+#include "./impl/gradient/solver.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Numerical direct SLAE-solving method. Uses partial pivot LU decomposition from Eigen.
-//
-// Best method for a general choice.
+// Header exposing the public API.
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace gse::impl::linear::method {
+namespace gse::jacobian {
 
-struct PartialPivotLU {
-    
-    template <class T, Extent N>
-    Vector<T, N> operator()(const Matrix<T, N, N>& A, const Vector<T, N>& b) {
-        return A.partialPivLu().solve(b);
-    }
-};
+using impl::gradient::solve;
 
-} // namespace gse::impl::jacobian::method
+namespace defaults = impl::gradient::defaults;
+namespace method   = impl::gradient::method;
+
+} // namespace gse::jacobian
