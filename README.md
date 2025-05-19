@@ -24,7 +24,7 @@ The whole library is header-only and can be found [here](include/).
 - **Header-only.** Adding the library should be as simple as a single `#include`. All dependencies should be embedded.
 - **Easy to use.** Library should provide a simple APIs similar to the ones used in [Matlab](https://en.wikipedia.org/wiki/MATLAB) / [Julia](https://en.wikipedia.org/wiki/Julia_(programming_language)) / [Numpy](https://github.com/numpy/numpy).
 - **Strong type safety.** Library should utilize C++ type system to check as much logic as possible at compile-time and provide zero-overhead abstractions.
-- **Extreme modularity.** All things should be built in a generic modular way so different methods can be spliced together seamlessly "like Lego bricks". This is very much unlike most Matlab & Julia solvers that tend to tightly couple methods to a function.
+- **Extreme modularity.** All things should be built in a generic modular way so different methods can be [spliced together seamlessly "like Lego bricks"](./docs/guide_modularity_showcase.md). This is very much unlike most Matlab & Julia solvers that tend to tightly couple methods to a function.
 
 ## Documentation
 
