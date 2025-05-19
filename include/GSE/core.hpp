@@ -10,14 +10,10 @@
 
 // _______________________ INCLUDES _______________________
 
-#include <array>            // array<>
-#include <initializer_list> // initializer_list<>
-#include <vector>           // vector<>
-
-#include "impl/format.hpp" // format::
-#include "impl/init.hpp"   // init::
-#include "impl/rng.hpp"    // PRNG
-#include "impl/types.hpp"  // Idx, Extent, Uint, dynamic_size, Scalar, Vector<>, Matrix<>
+#include "./impl/core/format.hpp"
+#include "./impl/core/init.hpp"
+#include "./impl/core/rng.hpp"
+#include "./impl/core/types.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -34,8 +30,7 @@ namespace gse {
 using impl::Idx;
 using impl::Uint;
 using impl::Extent;
-using impl::dynamic_size;
-using impl::Scalar;
+using impl::dynamic;
 using impl::Vector;
 using impl::Matrix;
 
@@ -54,15 +49,5 @@ namespace init = impl::init;
 using impl::to_std;
 
 namespace format = impl::format;
-
-// ===============
-// --- Helpers ---
-// ===============
-
-// template <class Mat>
-// constexpr Extent extent_rows = static_cast<Extent>(Mat::CompileTimeTraits::RowsAtCompileTime);
-
-// template <class Mat>
-// constexpr Extent extent_cols = static_cast<Extent>(Mat::CompileTimeTraits::ColsAtCompileTime);
 
 } // namespace gse

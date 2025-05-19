@@ -18,7 +18,8 @@ macro(add_benchmark filename)
     target_link_libraries(${filename} PRIVATE Backward::Interface)
 endmacro()
 
-add_benchmark(benchmark_ode)
+# TEMP:
+# add_benchmark(benchmark_ode)
 
 # Link OpenMP if doing benchmarks with it.
 # Don't forget to add '-fopenmp' to 'target_compile_options' 

@@ -10,7 +10,7 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "./impl/ode/solver.hpp"
+#include "./impl/nonlinear/solver.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -18,12 +18,11 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace gse::ode {
+namespace gse::nonlinear {
 
-using impl::ode::solve;
+using impl::nonlinear::solve;
 
-namespace defaults = impl::ode::defaults;
-namespace base     = impl::ode::base;
-namespace method   = impl::ode::method;
+namespace defaults = impl::nonlinear::defaults;
+namespace method   = impl::nonlinear::method;
 
-} // namespace gse::ode
+} // namespace gse::nonlinear

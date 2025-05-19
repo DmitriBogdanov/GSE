@@ -111,7 +111,7 @@ private:
     gse::Vector<N> k1, k2, k3, k4;
 };
 
-template <gse::Extent N = gse::dynamic_size>
+template <gse::Extent N = gse::dynamic>
 struct RK4_naive {
     // - Params -
     gse::Scalar tau = gse::ode::defaults::tau;

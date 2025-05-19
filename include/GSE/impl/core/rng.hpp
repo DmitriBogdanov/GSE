@@ -13,8 +13,9 @@
 #include <array>   // array<>
 #include <cstdint> // uint32_t, uint64_t
 #include <limits>  // numeric_limits<>::max()
+#include <random>  // uniform_real_distribution<>, normal_distribution<>
 
-#include "traits.hpp" // require_seed_seq<>
+#include "./traits.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -73,6 +74,15 @@ public:
     }
 };
 
+// --- Type alias ---
+// ------------------
+
 using PRNG = SplitMix64;
+
+template <class T>
+using UniformDistribution = std::uniform_real_distribution<T>;
+
+template <class T>
+using NormalDistribution = std::normal_distribution<T>;
 
 } // namespace gse::impl

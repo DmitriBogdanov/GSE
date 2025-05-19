@@ -6,7 +6,7 @@ json=Import[NotebookDirectory[]<>"../temp/harmonic_oscillator.json"];
 
 solution="solution"/.json;
 t="t"/.solution;
-y="y"/.solution;
+y="x"/.solution;
 x=y[[All,1]];
 v=y[[All,2]];
 
@@ -25,6 +25,4 @@ grid=Grid[{
 },Background->White,Frame->All,Spacings->{2,2}]
 
 Export[NotebookDirectory[]<>"images/ode_harmonic_oscillator.svg",grid]
-
-
 

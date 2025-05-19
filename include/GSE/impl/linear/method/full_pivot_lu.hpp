@@ -10,20 +10,21 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "./impl/ode/solver.hpp"
+#include "../../core/types.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Header exposing the public API.
+// Numerical direct SLAE-solving method. Uses full pivot LU decomposition from Eigen.
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace gse::ode {
+namespace gse::impl::linear::method {
 
-using impl::ode::solve;
+struct FullPivotLU {
+    template <class T, Extent N>
+    Vector<T, N> operator()(const Matrix<T, N, N>& A, const Vector<T, N>& b) {
+        return A.fullPivLu().solve(b);
+    }
+};
 
-namespace defaults = impl::ode::defaults;
-namespace base     = impl::ode::base;
-namespace method   = impl::ode::method;
-
-} // namespace gse::ode
+} // namespace gse::impl::jacobian::method

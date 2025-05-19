@@ -10,7 +10,7 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "./impl/ode/solver.hpp"
+#include "./impl/linear/solver.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -18,12 +18,11 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace gse::ode {
+namespace gse::linear {
 
-using impl::ode::solve;
+using impl::linear::solve;
 
-namespace defaults = impl::ode::defaults;
-namespace base     = impl::ode::base;
-namespace method   = impl::ode::method;
+namespace defaults = impl::linear::defaults;
+namespace method   = impl::linear::method;
 
-} // namespace gse::ode
+} // namespace gse::linear

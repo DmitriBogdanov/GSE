@@ -4,34 +4,38 @@
 
 # GSE (Generic Solvers for Eigen)
 
-**GSE** is a simple Matlab-style library for solving:
+**GSE** is a highly flexible numerical library for:
 
-- [Ordinary differential equations (ODEs)](https://en.wikipedia.org/wiki/Ordinary_differential_equation)
-- [Stochastic differential equations (SDEs)](https://en.wikipedia.org/wiki/Stochastic_differential_equation)
-- [Non-linear algebraic systems](https://en.wikipedia.org/wiki/Nonlinear_system)
+- [Solving linear systems](https://en.wikipedia.org/wiki/Linear_system)
+- [Solving non-linear systems](https://en.wikipedia.org/wiki/Nonlinear_system)
+- [Computing numerical jacobians](https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant)
+- [Solding ordinary differential equations (ODEs)](https://en.wikipedia.org/wiki/Ordinary_differential_equation)
+- [Solving stochastic differential equations (SDEs)](https://en.wikipedia.org/wiki/Stochastic_differential_equation)
 
-built on top of [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) linear algebra library.
+built on top of [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) linear algebra functionality.
 
 The whole library is header-only and can be found [here](include/).
 
 > [!Warning]
-> As of now, the library is **work-in-progress**, it contains the core functionality and documentation, but there is plenty of work left to be done. **Contributions are welcome**, see [contribution guide](./CONTRIBUTING.md).
+> As of now, the library is **early-alpha-work-in-progress**, it contains core functionality and documentation, but there is plenty of work left to be done.
 
 ## Design Principles
 
 - **Header-only.** Adding the library should be as simple as a single `#include`. All dependencies should be embedded.
-- **Easy to use.** Library should provide a simple API similar to the ones used in [Matlab](https://en.wikipedia.org/wiki/MATLAB) / [Julia](https://en.wikipedia.org/wiki/Julia_(programming_language)) / [Numpy](https://github.com/numpy/numpy).
+- **Easy to use.** Library should provide a simple APIs similar to the ones used in [Matlab](https://en.wikipedia.org/wiki/MATLAB) / [Julia](https://en.wikipedia.org/wiki/Julia_(programming_language)) / [Numpy](https://github.com/numpy/numpy).
 - **Strong type safety.** Library should utilize C++ type system to check as much logic as possible at compile-time and provide zero-overhead abstractions.
-- **Modularity.** All solvers should be built in a modular way that allows them to be compatible with a wide range of custom systems / integrators / PRNGs / distributions / etc. This is very much unlike most Matlab & Julia solvers that tend to tightly couple integration methods to a function.
+- **Extreme modularity.** All things should be built in a generic modular way so different methods can be spliced together seamlessly "like Lego bricks". This is very much unlike most Matlab & Julia solvers that tend to tightly couple methods to a function.
 
 ## Documentation
 
-| Module                                 | Short description                        |
-| -------------------------------------- | ---------------------------------------- |
-| [**gse::core**](./docs/module_core.md) | Core typedefs                            |
-| [**gse::ode**](./docs/module_ode.md)   | Ordinary differential equation solvers   |
-| [**gse::sde**](./docs/module_sde.md)   | Stochastic differential equation solvers |
-| [**gse::alg**](./docs/module_alg.md)   | Non-linear algebraic system solvers      |
+| Module                                           | Short description                        |
+| ------------------------------------------------ | ---------------------------------------- |
+| [**gse::core**](./docs/module_core.md)           | Core typedefs                            |
+| [**gse::linear**](./docs/module_linear.md)       | Linear system solvers                    |
+| [**gse::nonlinear**](./docs/module_nonlinear.md) | Non-linear system solvers                |
+| [**gse::jacobian**](./docs/module_jacobian.md)   | Numerical Jacobian computation           |
+| [**gse::ode**](./docs/module_ode.md)             | Ordinary differential equation solvers   |
+| [**gse::sde**](./docs/module_sde.md)             | Stochastic differential equation solvers |
 
 ## Performance
 
@@ -39,7 +43,7 @@ The library aims to provide good performance for both small & large systems, thi
 
 - **Dynamic & compile-time dimension support.** Similarly to Eigen [fixed-size & dynamic vectors](https://eigen.tuxfamily.org/dox/group__TopicFixedSizeVectorizable.html), all methods are templated on an optionally dynamic size, this means problems where dimension is known at compile time can operate entirely on the stack with no dynamic allocations.
 
-- **Type-safe passing of callables.** All callables in this library are passed as SFINA-restricted template parameters, this completely avoids the overhead of type-erased delegates such as `std::function` and allows compiler to properly inline callable arguments inside the solvers.
+- **Type-safe passing of callables.** All callables in this library are propagated as perfectly-forwarded SFINA-restricted template parameters, this completely avoids the overhead of type-erased delegates such as `std::function` and allows compiler to properly inline methods inside the solvers.
 
 - **SIMD support.** By the virtue of using Eigen backend we can fully benefit from its [vectorization capacity](http://eigen.tuxfamily.org/index.php?title=FAQ#Vectorization) without mudding the source code with intrinsics. As of 2025 Eigen supports SSE, AVX, AVX2, AVX512, AltiVec/VSX, ARM NEON and S390x SIMD.
 
@@ -51,7 +55,6 @@ The library aims to provide good performance for both small & large systems, thi
 
 - [Why use Eigen as a backend](./docs/guide_backend_motivation.md)
 - [How is GSE different from Boost.Odeint and SUNDIALS](./docs/guide_library_differences.md)
-- [How to use custom scalar types](./docs/guide_custom_scalar_types.md)
 - [How to contribute](./CONTRIBUTING.md)
 
 ## Work in progress
