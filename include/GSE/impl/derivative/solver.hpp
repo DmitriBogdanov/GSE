@@ -29,7 +29,8 @@
 
 namespace gse::impl::derivative::defaults {
 
-using derivative_method = method::CentralDifference;
+template <class T>
+using derivative_method = method::CentralDifference<T>;
 
 } // namespace gse::impl::derivative::defaults
 
@@ -58,7 +59,7 @@ namespace gse::impl::derivative {
 //    'x'              - evaluation point,
 //    'method'         - numerical differentiation method.
 //
-template <class T, Extent N, class Func, class Method = defaults::derivative_method,
+template <class T, Extent N, class Func, class Method = defaults::derivative_method<T>,
           require_scalar_function<T, N, Func> = true, require_valid_method<T, N, Func, Method> = true>
 T solve(Func&& f, T x, Method method = Method{}) {
     return method(f, x);

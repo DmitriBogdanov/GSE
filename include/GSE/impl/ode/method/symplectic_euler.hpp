@@ -37,8 +37,10 @@
 
 namespace gse::impl::ode::method {
 
-template <class T, class NonlinearMethod = nonlinear::defaults::nonlinear_method>
-struct SymplecticEuler : base::Implicit<T> {
+template <class T, class NonlinearMethod = nonlinear::defaults::nonlinear_method<T>>
+struct SymplecticEuler : base::Common<T> {
+
+    NonlinearMethod nonlinear_method;
 
     template <Extent N, class Func, require_time_vector_function<T, N, Func> = true>
     std::pair<T, Vector<T, N>> operator()(Func&& f, T t, Vector<T, N> y0) {
@@ -48,8 +50,7 @@ struct SymplecticEuler : base::Implicit<T> {
             return y1 - y0 - tau * 0.5 * (f(t + tau, y1) + f(t, y0));
         };
 
-        y0 = nonlinear::solve(implicit_equation, std::move(y0), this->newton_precision, this->newton_max_iterations,
-                              NonlinearMethod{});
+        y0 = nonlinear::solve(implicit_equation, std::move(y0), this->nonlinear_method);
         t += tau;
         return {t, std::move(y0)};
     }

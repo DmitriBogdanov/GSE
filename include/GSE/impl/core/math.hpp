@@ -59,4 +59,13 @@ template <class T, require_floating_point<T> = true>
     return approx_equals(r0, r) ? r0 : cbrt(x, r);
 }
 
+// Same thing for 'sqrt()', here
+//    f(r) = 0 where f(r) = r^2 - x, f'(r) = 2 r
+template <class T, require_floating_point<T> = true>
+[[nodiscard]] constexpr T sqrt(T x, T r0 = T(1)) noexcept {
+    const T r = r0 - (sqr(r0) - x) / (T(2) * r0);
+
+    return approx_equals(r0, r) ? r0 : sqrt(x, r);
+}
+
 } // namespace gse::impl::math

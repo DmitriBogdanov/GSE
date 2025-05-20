@@ -14,6 +14,7 @@
 #include "../../core/types.hpp"
 #include "../../jacobian/solver.hpp"
 #include "../../linear/solver.hpp"
+#include "./base.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -33,15 +34,18 @@
 
 namespace gse::impl::nonlinear::method {
 
-template <class JacobianMethod = jacobian::defaults::jacobian_method,
-          class LinearMethod   = linear::defaults::linear_method>
-struct Newton {
+template <class T, class JacobianMethod = jacobian::defaults::jacobian_method<T>,
+          class LinearMethod = linear::defaults::linear_method>
+struct Newton : base::Common<T> {
 
-    template <class T, Extent N, class Func, require_vector_function<T, N, Func> = true>
+    JacobianMethod jacobian_method;
+    LinearMethod   linear_method;
+
+    template <Extent N, class Func, require_vector_function<T, N, Func> = true>
     Vector<T, N> operator()(Func&& f, Vector<T, N> x0) {
-        Matrix<T, N, N> J = jacobian::solve(f, x0, JacobianMethod{});
+        Matrix<T, N, N> J = jacobian::solve(f, x0, this->jacobian_method);
 
-        return x0 + linear::solve(J, (-f(x0)).eval(), LinearMethod{});
+        return x0 + linear::solve(J, (-f(x0)).eval(), this->linear_method);
         // without 'eval()' Eigen gets a little confused with expression templates
     }
 };

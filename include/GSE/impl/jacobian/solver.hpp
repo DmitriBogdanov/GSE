@@ -29,7 +29,8 @@
 
 namespace gse::impl::jacobian::defaults {
 
-using jacobian_method = method::CentralDifference;
+template <class T>
+using jacobian_method = method::CentralDifference<T>;
 
 } // namespace gse::impl::jacobian::defaults
 
@@ -54,11 +55,11 @@ namespace gse::impl::jacobian {
 //    f: R^N -> R^N
 //
 // here:
-//    'f'              - vector-function,
-//    'x'              - evaluation point,
-//    'method'         - numerical differentiation method.
+//    'f'      - vector-function,
+//    'x'      - evaluation point,
+//    'method' - numerical differentiation method.
 //
-template <class T, Extent N, class Func, class Method = defaults::jacobian_method,
+template <class T, Extent N, class Func, class Method = defaults::jacobian_method<T>,
           require_vector_function<T, N, Func> = true, require_valid_method<T, N, Func, Method> = true>
 Matrix<T, N, N> solve(Func&& f, const Vector<T, N>& x, Method method = Method{}) {
     return method(f, x);

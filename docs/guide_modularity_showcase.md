@@ -2,25 +2,41 @@
 
 [<- back to README.md](..)
 
-The library's architecture is built around the idea of treating all numerical methods like a constructor — complex numerical methods are built from simpler methods like building blocks.
+The library's architecture is **built around the idea of treating all numerical methods like a constructor** — complex numerical methods are built from simpler methods like building blocks.
 
-For example, let's say we want to define a custom ODE integrator which should:
+**For example, let's say we want to define a custom ODE integrator** which should:
 
-1. Use symplectic Euler's scheme (an implicit method)
-2. Solve underlying nonlinear systems using Newton's method
-3. Compute jacobians for Newton's method using central difference formula
-4. Solve linear systems inside Newton's method using full-pivot LU decomposition
+**1.** Use symplectic Euler's scheme (an implicit method)
+**2.** Solve underlying nonlinear systems using Newton's method
+**3.** Compute jacobians for Newton's method using central difference formula
+**4.** Solve linear systems inside Newton's method using QR decomposition
 
 Defining such integrator is as simple as composing it from corresponding templates:
 
 ```cpp
-using custom_ode_integrator = ode::method::SymplecticEuler<
-    double,
-    nonlinear::method::Newton<
-        jacobian::method::CentralDifference,
-        linear::method::FullPivotLU
+using custom_ode_method = gse::ode::method::SymplecticEuler<double,
+    gse::nonlinear::method::Newton<double,
+        gse::jacobian::method::CentralDifference<double>,
+        gse::linear::method::HouseholderQR
     >
 >;
+```
+
+In the same fashion we can configure every single parameter of all "building blocks":
+
+```cpp
+custom_ode_method method;
+
+method.time_step                                  = 1e-3; // ODE time step
+method.nonlinear_method.precision                 = 1e-6; // internal Newton's method precision
+method.nonlinear_method.jacobian_method.diff_step = 1e-5; // internal jacobian numerical diff. step
+// ...
+```
+
+and then we can just throw this method into the `solve()`:
+
+```cpp
+gse::ode::solve(f, x0, t0, t1, callback, method);
 ```
 
 This approach applies to **all** methods in the library, making it extremely easy switch implementation details at every level.

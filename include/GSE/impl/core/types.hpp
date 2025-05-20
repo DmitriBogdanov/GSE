@@ -10,7 +10,19 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "../thirdparty/Eigen/Dense" // Matrix, Vector, Dynamic
+// Silences false positive warnings on GCC 11-13 about uninitialized variables in 'TriangularMatrixVector.h'.
+// In this codebase the warning gets triggered by 'A.householderQr().solve(b)' in linear methods,
+// see https://gitlab.com/libeigen/eigen/-/issues/2787
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
+#include "../thirdparty/Eigen/Dense" // Matrix, Vector, Dynamic, ...
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 // ____________________ DEVELOPER DOCS ____________________
 

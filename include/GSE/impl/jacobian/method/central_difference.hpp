@@ -10,12 +10,10 @@
 
 // _______________________ INCLUDES _______________________
 
-#include <limits> // numeric_limits<>::epsilon()
-
 #include "../../core/init.hpp"
-#include "../../core/math.hpp"
 #include "../../core/traits.hpp"
 #include "../../core/types.hpp"
+#include "./base.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -27,14 +25,12 @@
 
 namespace gse::impl::jacobian::method {
 
-struct CentralDifference {
-    
-    template <class T, Extent N, class Func, require_vector_function<T, N, Func> = true>
+template <class T>
+struct CentralDifference : base::CentralScheme<T> {
+
+    template <Extent N, class Func, require_vector_function<T, N, Func> = true>
     Matrix<T, N, N> operator()(Func&& f, const Vector<T, N>& x) {
-        constexpr T h       = math::cbrt(std::numeric_limits<T>::epsilon());
-        constexpr T inv_2_h = 1 / (2 * h);
-        // for central differences optimal step size is a cube root of machine epsilon,
-        // see https://en.wikipedia.org/wiki/Numerical_differentiation
+        const T h = this->diff_step;
 
         Vector<T, N>    x_plus_dxj = x;
         Matrix<T, N, N> J          = init::zero<T, N, N>(x.rows(), x.rows());
@@ -56,7 +52,7 @@ struct CentralDifference {
             J.col(j) -= f(x_plus_dxj);
             x_plus_dxj[j] = x[j];
 
-            J.col(j) *= inv_2_h;
+            J.col(j) /= (2 * h);
         }
 
         return J;

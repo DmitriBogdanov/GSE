@@ -58,13 +58,7 @@ struct Common {
 };
 
 template <class T>
-struct Implicit : Common<T> {
-    T newton_precision      = defaults::newton_precision<T>;
-    T newton_max_iterations = defaults::newton_max_iterations<T>;
-};
-
-template <class T>
-struct Adaptive : Common<T> {
+struct AdaptiveScheme : Common<T> {
     T min_time_step = defaults::min_time_step<T>;
     T max_time_step = defaults::max_time_step<T>;
 

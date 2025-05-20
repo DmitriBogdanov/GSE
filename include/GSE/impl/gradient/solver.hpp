@@ -29,7 +29,8 @@
 
 namespace gse::impl::gradient::defaults {
 
-using gradient_method = method::CentralDifference;
+template <class T>
+using gradient_method = method::CentralDifference<T>;
 
 } // namespace gse::impl::gradient::defaults
 
@@ -58,7 +59,7 @@ namespace gse::impl::gradient {
 //    'x'              - evaluation point,
 //    'method'         - numerical differentiation method.
 //
-template <class T, Extent N, class Func, class Method = defaults::gradient_method,
+template <class T, Extent N, class Func, class Method = defaults::gradient_method<T>,
           require_multivariate_function<T, N, Func> = true, require_valid_method<T, N, Func, Method> = true>
 Vector<T, N> solve(Func&& f, const Vector<T, N>& x, Method method = Method{}) {
     return method(f, x);

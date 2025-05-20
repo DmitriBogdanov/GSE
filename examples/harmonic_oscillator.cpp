@@ -1,5 +1,9 @@
 #include "GSE/core.hpp"
-#include "GSE/impl/linear/method/bi_cg_stab.hpp"
+#include "GSE/impl/jacobian/method/central_difference.hpp"
+#include "GSE/impl/linear/method/full_pivot_lu.hpp"
+#include "GSE/impl/linear/method/householder_qr.hpp"
+#include "GSE/impl/linear/method/partial_pivot_lu.hpp"
+#include "GSE/impl/nonlinear/method/newton.hpp"
 #include "GSE/jacobian.hpp"
 #include "GSE/linear.hpp"
 #include "GSE/nonlinear.hpp"
@@ -19,40 +23,14 @@ using Scalar = double;
 using Vector = gse::Vector<Scalar, 2>;
 using Matrix = gse::Matrix<Scalar, 2, 2>;
 
-void neat_example() {
-    using namespace gse;
-    using Scalar  = double;
-    using Vector2 = gse::Vector<Scalar, 2>;
-
-    // Cauchy's problem for harmonic oscillator equation
-    // { x' = v
-    // { v' = -k/m x
-    // { x(0) = 1, v(0) = 0
-    const auto    f  = [](Scalar, const Vector2& u) -> Vector2 { return {u[1], -std::sqrt(2) * u[0]}; };
-    const Vector2 x0 = {0, 1};
-    const Scalar  t0 = 0;
-    const Scalar  t1 = 10;
-
-    // Construct a custom ODE integration method, let's say we want to use symplectic Euler's 
-    // method while solving its implicit systems with Newton's method, which should use
-    // central differences to compute jacobian and LU-decomposition to solve linear systems
-    using ode_integrator = ode::method::SymplecticEuler<
-        Scalar,
-        nonlinear::method::Newton<
-            jacobian::method::CentralDifference,
-            linear::method::BiCGSTAB
-        >
-    >;
-
-    // Solve ODE
-    ode::solve(f, x0, t0, t1, ode_integrator{});
-}
+template <class T1, class T2 = float>
+struct TestStruct {};
 
 int main() {
     // ODE Problem (harmonic oscillator equation)
     const auto f = [](Scalar, const Vector& u) -> Vector { return {u[1], -std::sqrt(2) * u[0]}; };
 
-    const Vector y0 = {0, 1};
+    const Vector x0 = {0, 1};
     const Scalar t0 = 0;
     const Scalar t1 = 10;
 
@@ -70,16 +48,19 @@ int main() {
     };
 
     // (optional) Select integrator
-    using integrator_type = gse::ode::method::SymplecticEuler<
-        Scalar,
-        gse::nonlinear::method::Newton<gse::jacobian::method::CentralDifference, gse::linear::method::BiCGSTAB>>;
+    using custom_ode_method = gse::ode::method::SymplecticEuler<
+        double, gse::nonlinear::method::Newton<double, gse::jacobian::method::CentralDifference<double>,
+                                               gse::linear::method::HouseholderQR>>;
 
-    integrator_type method;
-    method.time_step = 1e-6;
+    custom_ode_method method;
+    method.time_step                                  = 1e-3; // ODE method time step
+    method.nonlinear_method.precision                 = 1e-6; // internal Newton's method precision
+    method.nonlinear_method.jacobian_method.diff_step = 1e-5; // internal jacobian numerical diff. step
+    // ...
 
     // Solve for 't' in [0, 10], export results at 100 time layers
     utl::time::Stopwatch watch;
-    gse::ode::solve(f, y0, t0, t1, callback, method);
+    gse::ode::solve(f, x0, t0, t1, callback, method);
     utl::log::println(watch.elapsed_string());
 
     json.to_file("temp/harmonic_oscillator.json");

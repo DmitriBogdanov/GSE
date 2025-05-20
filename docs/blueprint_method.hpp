@@ -11,26 +11,29 @@
 // _______________________ INCLUDES _______________________
 
 #include "../../core/traits.hpp"
+#include "../../core/types.hpp"
+
 #include "./base.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Numerical derivative evaluation method. Uses central finite difference.
-//    Error: O(h^2)
-//    Cost:  2 'f(x)' evaluations (~ 2 non-linear coef evaluations)
+// <method type>. <method name>.
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace gse::impl::derivative::method {
+namespace gse::impl::ode::method {
 
-template <class T>
-struct CentralDifference : base::CentralScheme<T> {
-
-    template <Extent N, class Func, require_scalar_function<T, N, Func> = true>
-    T operator()(Func&& f, T x) {
-        constexpr T h = this->diff_step;
-        return (f(x + h) - f(x - h)) / (2 * h);
+template <class T, /* (!optional) SomeMethod = some::defaults::some_method<T>, ... */>
+struct NewMethod : base::Common<T> {
+    
+    // (!optional)
+    // SomeMethod some_method;
+    // ...
+    
+    template <Extent N, class Func, require_some_function<T, N, Func> = true>
+    /* return_type */ operator()(/* args... */) {
+        
     }
 };
 
-} // namespace gse::impl::derivative::method
+} // namespace gse::impl::ode::method

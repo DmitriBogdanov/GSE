@@ -11,6 +11,8 @@
 // _______________________ INCLUDES _______________________
 
 #include "../../core/types.hpp"
+#include "GSE/impl/thirdparty/Eigen/src/Core/util/Macros.h"
+#include "GSE/impl/thirdparty/Eigen/src/QR/HouseholderQR.h"
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -26,7 +28,7 @@ struct HouseholderQR {
     
     template <class T, Extent N>
     Vector<T, N> operator()(const Matrix<T, N, N>& A, const Vector<T, N>& b) {
-        return A.householderQr().solve(b);
+        return A.householderQr().solve(b);  
     }
 };
 
