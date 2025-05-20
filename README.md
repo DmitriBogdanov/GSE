@@ -17,7 +17,7 @@ built on top of [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) l
 The whole library is header-only and can be found [here](include/).
 
 > [!Warning]
-> As of now, the library is **early-alpha-work-in-progress**, it contains core functionality and documentation, but there is plenty of work left to be done.
+> As of now, the library is in **early alpha**, it contains core functionality and documentation, but there is plenty of work left to be done.
 
 ## Design Principles
 

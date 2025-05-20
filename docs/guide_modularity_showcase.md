@@ -6,10 +6,10 @@ The library's architecture is **built around the idea of treating all numerical 
 
 **For example, let's say we want to define a custom ODE integrator** which should:
 
-**1.** Use symplectic Euler's scheme (an implicit method)
-**2.** Solve underlying nonlinear systems using Newton's method
-**3.** Compute jacobians for Newton's method using central difference formula
-**4.** Solve linear systems inside Newton's method using QR decomposition
+1. Use symplectic Euler's scheme (an implicit method)
+2. Solve underlying nonlinear systems using Newton's method
+3. Compute jacobians for Newton's method using central difference formula
+4. Solve linear systems inside Newton's method using QR decomposition
 
 Defining such integrator is as simple as composing it from corresponding templates:
 
