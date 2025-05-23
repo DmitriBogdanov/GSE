@@ -20,7 +20,7 @@
 // ____________________ DEVELOPER DOCS ____________________
 
 // Iteration of an ODE integration method. Explicit Euler's scheme.
-//    Error:       O(tau^4)
+//    Error:       O(tau)
 //    Cost:        1 'f(t, x)' evaluation
 //    Stability:   -
 //    Adaptive:    false

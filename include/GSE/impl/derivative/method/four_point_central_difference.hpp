@@ -15,21 +15,21 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Numerical derivative evaluation method. Uses central finite difference.
-//    Error: O(h^2)
-//    Cost:  2 'f(x)' evaluations (~ 2 non-linear coef evaluations)
+// Numerical derivative evaluation method. Uses 4-point central finite difference.
+//    Error: O(h^4)
+//    Cost:  4 'f(x)' evaluations (~ 4 non-linear coef evaluations)
 
 // ____________________ IMPLEMENTATION ____________________
 
 namespace gse::impl::derivative::method {
 
 template <class T>
-struct CentralDifference : base::CentralScheme<T> {
+struct FourPointCentralDifference : base::FourPointCentralScheme<T> {
 
     template <class Func, require_scalar_function<T, Func> = true>
     T operator()(Func&& f, T x) {
         const T h = this->diff_step;
-        return (f(x + h) - f(x - h)) / (2 * h);
+        return (f(x - 2 * h) - 8 * f(x - h) + 8 * f(x + h) - f(x + 2 * h)) / (12 * h);
     }
 };
 

@@ -18,7 +18,7 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace gse::jacobian {
+namespace gse::gradient {
 
 using impl::gradient::solve;
 

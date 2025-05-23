@@ -8,7 +8,6 @@ endmacro()
 
 add_example(harmonic_oscillator)
 
-
 # _______________________ EXAMPLES _______________________
 
 # # Macro for defining regular executable with optimization

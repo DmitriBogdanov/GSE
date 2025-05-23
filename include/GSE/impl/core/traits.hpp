@@ -52,58 +52,58 @@ GSE_IMPL_DEFINE_TRAIT(seed_seq,
 // --- Type deduction traits ---
 // =============================
 
-// We do a lot of type deduction magic on callable types,
-// below are the traits for it
+// // We do a lot of type deduction magic on callable types,
+// // below are the traits for it
 
-// Type deduction:
-//    callable_type -> corresponding_signature_type
-// Example:
-//    Callable: 'auto lambda = [](int) -> double {}'
-//    Callable  type: 'decltype(lambda)'
-//    Signature type: 'double(int)'
-// How it works:
-//    We can deduce signature type from an 'std::function' using partial specialization.
-//    By itself it doesn't work for arbitrary callable type 'Func'.
-//    We can convert any callable type to 'std::function' using 'decltype(std::function(std::declval<Func>()))'.
-//    Apply the trait to the result above now works for arbitrary callables.
-// Limitations:
-//    Function must not be ambiguous (overloaded).
-template <class Func>
-struct signature_of_callable_impl;
+// // Type deduction:
+// //    callable_type -> corresponding_signature_type
+// // Example:
+// //    Callable: 'auto lambda = [](int) -> double {}'
+// //    Callable  type: 'decltype(lambda)'
+// //    Signature type: 'double(int)'
+// // How it works:
+// //    We can deduce signature type from an 'std::function' using partial specialization.
+// //    By itself it doesn't work for arbitrary callable type 'Func'.
+// //    We can convert any callable type to 'std::function' using 'decltype(std::function(std::declval<Func>()))'.
+// //    Apply the trait to the result above now works for arbitrary callables.
+// // Limitations:
+// //    Function must not be ambiguous (overloaded).
+// template <class Func>
+// struct signature_of_callable_impl;
 
-template <class R, class... Args>
-struct signature_of_callable_impl<std::function<R(Args...)>> {
-    using type = R(Args...);
-};
+// template <class R, class... Args>
+// struct signature_of_callable_impl<std::function<R(Args...)>> {
+//     using type = R(Args...);
+// };
 
-template <class Func>
-using signature_of_callable_t =
-    typename signature_of_callable_impl<decltype(std::function(std::declval<Func>()))>::type;
+// template <class Func>
+// using signature_of_callable_t =
+//     typename signature_of_callable_impl<decltype(std::function(std::declval<Func>()))>::type;
 
-// Type deduction:
-//    signature_type -> return_type
-// Example:
-//    Signature type: 'double(int)'
-//    Return    type: 'double'
-template <class T>
-struct return_type_of_signature_impl;
+// // Type deduction:
+// //    signature_type -> return_type
+// // Example:
+// //    Signature type: 'double(int)'
+// //    Return    type: 'double'
+// template <class T>
+// struct return_type_of_signature_impl;
 
-template <class R, class... Args>
-struct return_type_of_signature_impl<R(Args...)> {
-    using type = R;
-};
+// template <class R, class... Args>
+// struct return_type_of_signature_impl<R(Args...)> {
+//     using type = R;
+// };
 
-template <class T>
-using return_type_of_signature_t = typename return_type_of_signature_impl<T>::type;
+// template <class T>
+// using return_type_of_signature_t = typename return_type_of_signature_impl<T>::type;
 
-// Type deduction:
-//    callable_type -> return_type
-// Example:
-//    Callable: 'auto lambda = [](int) -> double {}'
-//    Callable  type: 'decltype(lambda)'
-//    Return    type: 'double'
-template <class T>
-using return_type_of_callable_t = return_type_of_signature_t<signature_of_callable_t<T>>;
+// // Type deduction:
+// //    callable_type -> return_type
+// // Example:
+// //    Callable: 'auto lambda = [](int) -> double {}'
+// //    Callable  type: 'decltype(lambda)'
+// //    Return    type: 'double'
+// template <class T>
+// using return_type_of_callable_t = return_type_of_signature_t<signature_of_callable_t<T>>;
 
 // ======================
 // --- SFINAE helpers ---
@@ -147,7 +147,7 @@ using require_vector_function = require_invocable_r<Vector<T, N>, Func, Vector<T
 template <class T, Extent N, class Func>
 using require_multivariate_function = require_invocable_r<T, Func, Vector<T, N>>;
 
-template <class T, Extent N, class Func>
+template <class T, class Func>
 using require_scalar_function = require_invocable_r<T, Func, T>;
 
 template <class T, Extent N, class Func>

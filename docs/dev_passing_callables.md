@@ -92,7 +92,7 @@ void use_callable(Func&& f = Func{}) { f("argument"); }
 ```cpp
 template<
     class Func = DefaultFunc,
-    _require_callable_r<Ret, Func, Arg1, Arg2> = true
+    require_callable_r<Ret, Func, Arg1, Arg2> = true
     // 'f' has signature 'Ret f(Arg1, Arg2)'
     // or 'const Ret& f(const Arg1&, const Arg2&)', that will work too
 >
@@ -104,7 +104,7 @@ void use_callable(Func&& f) { f("argument"); }
 ```cpp
 template<
     class Func = DefaultFunc,
-    _require_callable_r<Ret, Func, Arg1&, Arg2&> = true
+    require_callable_r<Ret, Func, Arg1&, Arg2&> = true
     // 'f' has signature 'Ret f(Arg1&, Arg2&)'
 >
 void use_callable(Func&& f = Func{}) { f("argument"); }
@@ -116,7 +116,7 @@ void use_callable(Func&& f = Func{}) { f("argument"); }
 template<
     class Func     = DefaultFunc,
 	class Callback = DefaultCallback,
-    _require_callable_r<Ret, Func, std::decay_t<Callback>> = true
+    require_callable_r<Ret, Func, std::decay_t<Callback>> = true
     // 'f' has signature 'Ret f(Callback&&)', notice that 'Callback' needs to be
     // wrapped in 'std::decay_t<>' because it's perfectly-forwarded
 >

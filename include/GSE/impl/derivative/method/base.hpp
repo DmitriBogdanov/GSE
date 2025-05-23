@@ -31,9 +31,19 @@ namespace gse::impl::derivative::defaults {
 
 // Finite difference steps sizes
 template <class T>
-constexpr T central_diff_step = math::cbrt(std::numeric_limits<T>::epsilon()); // ~ 'h' in literature
-// for central differences optimal step size is a cube root of machine epsilon,
+constexpr T directional_diff_step = math::root<2>(std::numeric_limits<T>::epsilon()); // ~ 'h' in literature
+// 2-nd of machine epsilon is a good estimate for most cases,
 // see https://en.wikipedia.org/wiki/Numerical_differentiation
+
+template <class T>
+constexpr T central_diff_step = math::root<3>(std::numeric_limits<T>::epsilon()); // ~ 'h' in literature
+// 3-rd of machine epsilon is a good estimate for most cases,
+// see https://en.wikipedia.org/wiki/Numerical_differentiation
+
+template <class T>
+constexpr T four_point_central_diff_step = math::root<5>(std::numeric_limits<T>::epsilon()); // ~ 'h' in literature
+// 5-th of machine epsilon is a good estimate for most cases,
+// see https://math.stackexchange.com/questions/2019573
 
 } // namespace gse::impl::derivative::defaults
 
@@ -44,8 +54,18 @@ constexpr T central_diff_step = math::cbrt(std::numeric_limits<T>::epsilon()); /
 namespace gse::impl::derivative::base {
 
 template <class T>
+struct DirectionalScheme {
+    T diff_step = defaults::directional_diff_step<T>;
+};
+
+template <class T>
 struct CentralScheme {
-    T diff_step = defaults::central_diff_step<T>; // differentiation step
+    T diff_step = defaults::central_diff_step<T>;
+};
+
+template <class T>
+struct FourPointCentralScheme {
+    T diff_step = defaults::four_point_central_diff_step<T>;
 };
 
 } // namespace gse::impl::derivative::base

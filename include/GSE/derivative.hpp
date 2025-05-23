@@ -18,7 +18,7 @@
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace gse::jacobian {
+namespace gse::derivative {
 
 using impl::derivative::solve;
 

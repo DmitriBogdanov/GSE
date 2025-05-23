@@ -29,7 +29,7 @@ template <class T>
 struct CentralDifference : base::CentralScheme<T> {
     
     template <Extent N, class Func, require_multivariate_function<T, N, Func> = true>
-    Matrix<T, N, N> operator()(Func&& f, const Vector<T, N>& x) {
+    Vector<T, N> operator()(Func&& f, const Vector<T, N>& x) {
         const T h = this->diff_step;
 
         Vector<T, N> x_plus_dxi = x;
@@ -38,15 +38,15 @@ struct CentralDifference : base::CentralScheme<T> {
         for (Idx i = 0; i < x.rows(); ++i) {
             // grad(i) = (f(x + dxi) - f(x - dxi)) / 2h
             // rewritten to avoid temporary vectors
-            x_plus_dxi[i] += this->diff_step;
-            grad[i] += f();
+            x_plus_dxi[i] += h;
+            grad[i] += f(x_plus_dxi);
             x_plus_dxi[i] = x[i];
 
-            x_plus_dxi[i] -= this->diff_step;
-            grad[i] -= f();
+            x_plus_dxi[i] -= h;
+            grad[i] -= f(x_plus_dxi);
             x_plus_dxi[i] = x[i];
 
-            grad[i] /= (2 * this->diff_step);
+            grad[i] /= (2 * h);
         }
 
         return grad;

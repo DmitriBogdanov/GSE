@@ -35,6 +35,14 @@ template <class T, require_arithmetic<T> = true>
     return x * x * x;
 }
 
+template <class T, require_arithmetic<T> = true>
+[[nodiscard]] constexpr T pow(T x, std::size_t p) noexcept {
+    if (p == 0) return T(1);
+    if (p == 1) return x;
+    const T half_pow = pow(x, p / 2);
+    return (p % 2 == 0) ? half_pow * half_pow : half_pow * half_pow * x;
+}
+
 template <class T, require_floating_point<T> = true>
 [[nodiscard]] constexpr bool approx_equals(T x, T y) noexcept {
     return abs(x - y) <= std::numeric_limits<T>::epsilon();
@@ -52,20 +60,37 @@ template <class T, require_floating_point<T> = true>
 //     r_n+1 = r_n - f(r_n) / f'(r_n)
 // we assume 'r' is computed precisely enough when |r_n+1 - r_n| < machine_epsilon
 //
-template <class T, require_floating_point<T> = true>
-[[nodiscard]] constexpr T cbrt(T x, T r0 = T(1)) noexcept {
-    const T r = r0 - (cube(r0) - x) / (T(3) * sqr(r0));
 
-    return approx_equals(r0, r) ? r0 : cbrt(x, r);
+
+// Constexpr n-th root based on recursive iteration of Newton's method:
+//
+// Let's say we have 'x' and need to compute
+//    r = x^(1/n)
+// let's rewrite it as an equation 'f(r) = 0':
+//    r^n = x
+//    r^n - x = 0
+//    => f(r) = 0 where f(r) = r^n - x, f'(r) = n r^(n-1)
+// we can now compute 'r' iteratively using Newton's method:
+//     r_k+1 = r_k - f(r_k) / f'(r_k)
+// we assume 'r' is computed precisely enough when |r_k+1 - r_k| < machine_epsilon
+//
+template <std::size_t n, class T, require_floating_point<T> = true>
+[[nodiscard]] constexpr T root(T x, T r0 = T(1)) noexcept {
+    const T r = r0 - (pow(r0, n) - x) / (T(n) * pow(r0, n - 1));
+
+    return approx_equals(r0, r) ? r0 : root<n>(x, r);
 }
 
-// Same thing for 'sqrt()', here
-//    f(r) = 0 where f(r) = r^2 - x, f'(r) = 2 r
+// Constexpr 'sqrt()'
 template <class T, require_floating_point<T> = true>
-[[nodiscard]] constexpr T sqrt(T x, T r0 = T(1)) noexcept {
-    const T r = r0 - (sqr(r0) - x) / (T(2) * r0);
+[[nodiscard]] constexpr T sqrt(T x) noexcept {
+    return root<2>(x);
+}
 
-    return approx_equals(r0, r) ? r0 : sqrt(x, r);
+// Constexpr 'cbrt()'
+template <class T, require_floating_point<T> = true>
+[[nodiscard]] constexpr T cbrt(T x) noexcept {
+    return root<3>(x);
 }
 
 } // namespace gse::impl::math

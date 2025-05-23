@@ -30,7 +30,7 @@ directory_tests="${directory_build}tests/"
 
 path_executable="${directory_build}source/main"
 
-compiler="g++"
+compiler="clang++-14" # "g++" / "clang++-11" / "clang++-14"
 test_flags="--rerun-failed --output-on-failure --timeout 60"
 
 # -----------------------

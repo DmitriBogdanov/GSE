@@ -67,8 +67,7 @@ template <class T, Extent N = dynamic, class Dist = UniformDistribution<T>, clas
     assert(rows >= 0);
 
     Vector<T, N> res = zero<T, N>(rows);
-
-    for (const auto& e : res) e = dist(gen);
+    for (auto& e : res) e = dist(gen);
     return res;
 }
 
@@ -78,7 +77,10 @@ template <class T, Extent N = dynamic, Extent M = dynamic, class Dist = UniformD
 
     Matrix<T, N, M> res = zero<T, N, M>(rows, cols);
 
-    for (const auto& e : res) e = dist(gen);
+    for (auto& e : res.reshaped()) e = dist(gen);
+    // Eigen matrices do not provide iterators, but Eigen vectors do, to do a range-based 
+    // loop over a matrix we can use reshaped view and treat it like a vector
+    
     return res;
 }
 
@@ -86,6 +88,12 @@ template <class T, Extent N = dynamic>
 [[nodiscard]] Vector<T, N> linspace(Idx rows, T min, T max) {
     assert(rows >= 0);
     return Vector<T, N>::LinSpaced(rows, min, max);
+}
+
+template <class T, Extent N = dynamic>
+[[nodiscard]] Matrix<T, N, N> identity(Idx rows, Idx cols) {
+    assert(rows >= 0 && cols >= 0);
+    return Matrix<T, N, N>::Identity(rows, cols);
 }
 
 template <class T, Extent N = dynamic>

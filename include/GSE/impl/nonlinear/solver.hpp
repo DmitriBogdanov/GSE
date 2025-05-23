@@ -63,10 +63,7 @@ namespace gse::impl::nonlinear {
 //
 template <class T, Extent N, class Func, class Method = method::Newton<T>, require_vector_function<T, N, Func> = true,
           require_valid_method<T, N, Func, Method> = true>
-Vector<T, N> solve(Func&&       f,                //
-                   Vector<T, N> x0,               //
-                   Method&&     method = Method{} //
-) {                                               //
+Vector<T, N> solve(Func&& f, Vector<T, N> x0, Method&& method = Method{}) {
     // Note: 'base::Common<T>' guarantees presense of 'precision' and 'max_iterations'
 
     Vector<T, N> x = x0;

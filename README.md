@@ -17,7 +17,7 @@ built on top of [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) l
 The whole library is header-only and can be found [here](include/).
 
 > [!Warning]
-> As of now, the library is in **early alpha**, it contains core functionality and documentation, but there is plenty of work left to be done.
+> As of now, the library is in **early alpha**, it contains core functionality, but there is plenty of work left to be done in both implementation and its documentation.
 
 ## Design Principles
 
@@ -76,10 +76,12 @@ The library aims to provide good performance for both small & large systems, thi
 
 ## Dependencies
 
-| Library                                      | License                                                      | Type        | Used for       | Embedded in repo |
-| -------------------------------------------- | ------------------------------------------------------------ | ----------- | -------------- | ---------------- |
-| [Eigen](https://eigen.tuxfamily.org)         | [MPL2](https://eigen.tuxfamily.org/index.php?title=Main_Page#License) | Third party | Linear algebra | ✔                |
-| [UTL](https://github.com/DmitriBogdanov/UTL) | [MIT](https://github.com/DmitriBogdanov/UTL/blob/master/LICENSE.md) | First party | Examples       | ✔                |
+| Link                                               | License                                                      | Type        | Used for       | Part of the library | Embedded in repo |
+| -------------------------------------------------- | ------------------------------------------------------------ | ----------- | -------------- | ------------------- | ---------------- |
+| [Eigen](https://eigen.tuxfamily.org)               | [MPL2](https://eigen.tuxfamily.org/index.php?title=Main_Page#License) | Third party | Linear algebra | ✔                   | ✔                |
+| [doctest](https://github.com/doctest/doctest)      | [MIT](https://github.com/doctest/doctest/blob/master/LICENSE.txt) | Third party | Unit testing   | ✘                   | ✔                |
+| [nanobench](https://github.com/martinus/nanobench) | [MIT](https://github.com/martinus/nanobench/blob/master/LICENSE) | Third party | Benchmarking   | ✘                   | ✔                |
+| [UTL](https://github.com/DmitriBogdanov/UTL)       | [MIT](https://github.com/DmitriBogdanov/UTL/blob/master/LICENSE.md) | First party | Examples       | ✘                   | ✔                |
 
 ## License
 
