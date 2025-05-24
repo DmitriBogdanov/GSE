@@ -8,13 +8,15 @@ macro(add_gse_test filename)
     target_compile_features(${filename} PRIVATE cxx_std_17)
     
     target_compile_options(${filename} PRIVATE
-        -O0
+        -O1 -fno-omit-frame-pointer
         -g3
         -fno-sanitize-recover=all
         -fsanitize=undefined,address,leak
         -Wall -Wextra -Wpedantic -Werror
     )
-    # '-O0  -fno-omit-frame-pointer'           => no optimization makes compilation a bit faster
+    # '-O1  -fno-omit-frame-pointer'           => some optimization is necessary due to how badly Eigen
+    #                                             performs in debug, no-omit-frame-pointer prevents some
+    #                                             optimizations that make stack traces difficult to debug
     # '-g3'                                    => leave as much debug info as possible, use '-ggdb3'
     #                                             for GDB-specific format that has even more info
     # '-fno-sanitize-recover=all'              => sanitizers should stop execution (which fails the test)
@@ -47,3 +49,4 @@ add_gse_test(test_gradient)
 add_gse_test(test_jacobian)
 add_gse_test(test_linear)
 add_gse_test(test_nonlinear)
+add_gse_test(test_ode)
