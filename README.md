@@ -62,12 +62,17 @@ The library aims to provide good performance for both small & large systems, thi
 ## Work in progress
 
 - Documentation
-- Non-linear algebraic API improvements
-- More derivative, gradient and jacobian methods
-- More non-linear methods
-- More ODE methods
-- More SDE methods
-- Single- and multi-variate optimization module
+- Figure out a good solution for Eigen pass-by-value issues
+- Integrate solvers with Eigen expression template base classes
+- Modules: `gse::curvature`, `gse::hessian`, `gse::scalar_nonlinear`, `gse::optimization`, `gse::scalar_optimization`, `gse::bracketing`, `gse::scalar_bracketing`
+- `gse::nonlinear` API improvements
+- Stiff ODE methods
+- High order SDE methods
+- More derivative/gradient/jacobian differentiation methods
+- Stable nonlinear iterative methods
+- Support for auto-differentiation **(?)**
+- Platform-independent distributions for stochastic modeling
+- PRNG API improvements
 - CMake cleanup
 
 ## Requirements

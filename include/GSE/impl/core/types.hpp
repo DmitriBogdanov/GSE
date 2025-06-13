@@ -30,7 +30,7 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Core typedefs. The reason we use those 'gse::' typedefs instead of 
+// Core typedefs. The reason we use those 'gse::' typedefs instead of
 // original templates is so we can have stylistically uniform API.
 
 // ____________________ IMPLEMENTATION ____________________
@@ -58,5 +58,17 @@ using Vector = Eigen::Vector<T, N>;
 
 template <class T, Extent N = dynamic, Extent M = dynamic>
 using Matrix = Eigen::Matrix<T, N, M>;
+
+// --- Base types ---
+// ------------------
+
+template <class Derived>
+using MatrixBase = Eigen::MatrixBase<Derived>; // dense matrices (support matrix operations)
+
+template <class Derived>
+using ArrayBase = Eigen::ArrayBase<Derived>; // dense arrays (support element-wise operations)
+
+template <class Derived>
+using DenseBase = Eigen::DenseBase<Derived>; // dense arrays + matrices (support both matrix & element-wise operations)
 
 } // namespace gse::impl
