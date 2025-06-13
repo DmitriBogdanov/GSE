@@ -10,6 +10,7 @@
 
 // _______________________ INCLUDES _______________________
 
+#include "./impl/core/control_flow.hpp"
 #include "./impl/core/format.hpp"
 #include "./impl/core/init.hpp"
 #include "./impl/core/rng.hpp"
@@ -49,5 +50,11 @@ namespace init = impl::init;
 using impl::to_std;
 
 namespace format = impl::format;
+
+// ====================
+// --- Control flow ---
+// ====================
+
+using impl::ControlFlow;
 
 } // namespace gse

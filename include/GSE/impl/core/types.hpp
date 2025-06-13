@@ -13,14 +13,18 @@
 // Silences false positive warnings on GCC 11-13 about uninitialized variables in 'TriangularMatrixVector.h'.
 // In this codebase the warning gets triggered by 'A.householderQr().solve(b)' in linear methods,
 // see https://gitlab.com/libeigen/eigen/-/issues/2787
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ < 13) && (__GNUC__ > 11)
+#define GSE_IMPL_SILENCE_GCC_11_13_FALSE_POSITIVE
+#endif
+
+#ifdef GSE_IMPL_SILENCE_GCC_11_13_FALSE_POSITIVE
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 
 #include "../thirdparty/Eigen/Dense" // Matrix, Vector, Dynamic, ...
 
-#if defined(__GNUC__) && !defined(__clang__)
+#ifdef GSE_IMPL_SILENCE_GCC_11_13_FALSE_POSITIVE
 #pragma GCC diagnostic pop
 #endif
 
@@ -54,23 +58,5 @@ using Vector = Eigen::Vector<T, N>;
 
 template <class T, Extent N = dynamic, Extent M = dynamic>
 using Matrix = Eigen::Matrix<T, N, M>;
-
-// --- Vector type traits ---
-// --------------------------
-
-// Useful for compile time logic & type deduction
-
-namespace meta {
-
-template <class T>
-using value_type = typename T::value_type;
-
-template <class T>
-constexpr Idx rows = T::RowsAtCompileTime;
-
-template <class T>
-constexpr Idx cols = T::ColsAtCompileTime;
-
-}
 
 } // namespace gse::impl

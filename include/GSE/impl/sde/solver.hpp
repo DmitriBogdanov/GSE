@@ -12,6 +12,7 @@
 
 #include <utility> // pair<>
 
+#include "../core/control_flow.hpp"
 #include "../core/rng.hpp"
 #include "../core/traits.hpp"
 #include "../core/types.hpp"
@@ -154,7 +155,8 @@ Vector<T, N> solve(FuncA&&             A,                  //
 
     T time_since_callback = 0;
 
-    callback(t, x, method); // t0 always gets a callback
+    // t0 always gets a callback
+    GSE_IMPL_INVOKE_WITH_CONTROL_FLOW(callback(t, x, method), return x);
 
     while (t < t1) {
         std::tie(t, x) = method(A, B, gen, dist, t, std::move(x));
@@ -163,7 +165,7 @@ Vector<T, N> solve(FuncA&&             A,                  //
 
         if (time_since_callback >= callback_frequency) {
             time_since_callback -= callback_frequency;
-            callback(t, x, method);
+            GSE_IMPL_INVOKE_WITH_CONTROL_FLOW(callback(t, x, method), return x);
         }
     }
 

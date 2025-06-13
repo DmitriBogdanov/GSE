@@ -21,7 +21,7 @@
 //
 // Eigen has similar methods in its API ('::Zero()', '::Constant()', '::LinSpaced()', '::Random()'),
 // but their documentation is somewhat obscure and easy to forget, here we have all of them in a dedicated
-// namespace with some additional improvements (faster PRNG, more control points, more explicit API, etc.).
+// namespace with some additional improvements (faster RNG, more control points, more explicit API, etc.).
 
 // ____________________ IMPLEMENTATION ____________________
 

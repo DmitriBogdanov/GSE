@@ -34,12 +34,19 @@ int main() {
 
     const auto callback = [&](Scalar t, const Vector& y0, const auto& integrator) {
         utl::json::Node step_info;
+        
+        if (t > 5)  {
+            utl::log::println("Solution diverges at t = ", t);
+            return gse::ControlFlow::BREAK;
+        }
 
         step_info["t"]         = t;
         step_info["x"]         = gse::to_std(y0);
         step_info["time_step"] = integrator.time_step;
 
         json["solution"].push_back(std::move(step_info));
+        
+        return gse::ControlFlow::CONTINUE;
     };
 
     // (optional) Select integrator

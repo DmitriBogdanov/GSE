@@ -1,5 +1,9 @@
 # Guide on passing template callables
 
+## Summary
+
+Callables should be passed around with templates & perfect forwarding to avoid additional overhead.
+
 ## Why not use `std::function`
 
 `std::function` is slower that using a callable "by itself", in a nutshell:

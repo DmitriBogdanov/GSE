@@ -25,9 +25,9 @@
 
 namespace gse::impl {
 
-// ===================
-// --- Type traits ---
-// ===================
+// ================================
+// --- Feature detection traits ---
+// ================================
 
 #define GSE_IMPL_DEFINE_TRAIT(trait_name_, ...)                                                                        \
     template <class T, class = void>                                                                                   \
@@ -152,6 +152,25 @@ using require_scalar_function = require_invocable_r<T, Func, T>;
 
 template <class T, Extent N, class Func>
 using require_time_vector_function = require_invocable_r<Vector<T, N>, Func, T, Vector<T, N>>;
+
+// =========================
+// --- Vector parameters ---
+// =========================
+
+// Useful for compile time logic & type deduction
+
+namespace meta {
+
+template <class T>
+using value_type = typename T::value_type;
+
+template <class T>
+constexpr Idx rows = T::RowsAtCompileTime;
+
+template <class T>
+constexpr Idx cols = T::ColsAtCompileTime;
+
+}
 
 // ==============================
 // --- Vector-specific traits ---

@@ -14,7 +14,7 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Type conversion and IO formats useful for matrix serializing.
+// Type conversions and IO formats useful for matrix serializing.
 
 // ____________________ IMPLEMENTATION ____________________
 
