@@ -1,54 +1,25 @@
+# Add dependencies
+add_library               (UTL INTERFACE             )
+target_include_directories(UTL INTERFACE "firstparty")
+target_compile_features   (UTL INTERFACE cxx_std_17  )
 
-# Macro for defining examples
-macro(add_example filename)
-    add_executable(${filename} ${filename}.cpp)
-    target_compile_features(${filename} PRIVATE cxx_std_17)
-    target_compile_options(${filename} PRIVATE -O2 -Wall -Wextra -Wpedantic)
-endmacro()
+# Build examples
+function(gse_add_example file_name)
+    string(REPLACE "/" "-" target_name "${file_name}") # CMake doesn't like target names with slashes
+    string(PREPEND target_name "example-")             # so we don't intersect names with benchmarks & tests
+    
+    add_executable(${target_name} ${file_name}.cpp)
+    
+    target_compile_features(${target_name} PRIVATE ${GSE_COMPILE_FEATURES} )
+    target_compile_options (${target_name} PRIVATE ${GSE_TEST_FLAGS}       )
+    target_link_options    (${target_name} PRIVATE ${GSE_TEST_LINKER_FLAGS})
+    target_link_libraries  (${target_name} PRIVATE GSE UTL                 )
+    
+    add_test(
+        NAME ${target_name}
+        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${target_name} --no-intro --no-path-filenames --force-colors
+    ) # all examples double as tests
+    
+endfunction()
 
-add_example(harmonic_oscillator)
-
-# _______________________ EXAMPLES _______________________
-
-# # Macro for defining regular executable with optimization
-# macro(add_regular_executable filename)
-#     add_executable(${filename} ${filename}.cpp)
-#
-#     target_compile_features(${filename} PRIVATE cxx_std_17)
-#
-#     target_compile_options(${filename} PRIVATE
-#         -O2
-#         -Wall -Wextra -Wpedantic -Werror
-#     )
-#     # '-O2'                                    => reasonable level of optimization
-#     # '-Wall -Wextra -Wpedantic -Werror'       => more warnings, treat warnings as errors
-# endmacro()
-#
-# # Macro for defining test executable with debugging & guardrails
-# macro(add_test_executable filename)
-#     add_executable(${filename} ${filename}.cpp)
-#
-#     target_compile_features(${filename} PRIVATE cxx_std_17)
-#
-#     target_compile_options(${filename} PRIVATE
-#         -O0
-#         -g3 
-#         -fno-omit-frame-pointer
-#         -fno-sanitize-recover=all
-#         -fsanitize=undefined,address,leak
-#         -Wall -Wextra -Wpedantic -Werror
-#     )
-#     # '-O0  -fno-omit-frame-pointer'           => no optimization makes compilation a bit faster
-#     # '-g3'                                    => leave as much debug info as possible, use '-ggdb3'
-#     #                                             for GDB-specific format that has even more info
-#     # '-fno-omit-frame-pointer'                => doesn't matter with '-O0', prohibits optimization
-#     #                                             than makes stack traces harder to analyze
-#     # '-fno-sanitize-recover=all'              => sanitizers should stop execution (which fails the test)
-#     #                                             when  triggered, default behaviour is to continue
-#     # '-fsanitize=undefined,address,leak'      => enable sanitizers
-#     # '-Wall -Wextra -Wpedantic -Werror'       => more warnings, treat warnings as errors
-#     # see GCC docs: https://gcc.gnu.org/onlinedocs/gcc/Debugging-Options.html
-#     #               https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
-# endmacro()
-#
-# add_regular_executable(main.cpp)
+gse_add_example("module_ode/harmonic_oscillator")

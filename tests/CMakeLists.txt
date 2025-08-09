@@ -1,52 +1,33 @@
-include(CTest)
-enable_testing()
+# Add dependencies
+add_library               (doctest INTERFACE             )
+target_include_directories(doctest INTERFACE "thirdparty")
+target_compile_features   (doctest INTERFACE cxx_std_17  )
 
-# Macro for defining a test with proper doctest args
-macro(add_gse_test filename)
-    add_executable(${filename} ${filename}.cpp)
+# Build tests
+function(gse_add_test file_name)
+    string(REPLACE "/" "-" target_name "${file_name}") # CMake doesn't like target names with slashes
+    string(PREPEND target_name "test-")                # so we don't intersect names with benchmarks & examples
     
-    target_compile_features(${filename} PRIVATE cxx_std_17)
+    add_executable(${target_name} ${file_name}.cpp)
     
-    target_compile_options(${filename} PRIVATE
-        -O1 -fno-omit-frame-pointer
-        -g3
-        -fno-sanitize-recover=all
-        -fsanitize=undefined,address,leak
-        -Wall -Wextra -Wpedantic -Werror
-    )
-    # '-O1  -fno-omit-frame-pointer'           => some optimization is necessary due to how badly Eigen
-    #                                             performs in debug, no-omit-frame-pointer prevents some
-    #                                             optimizations that make stack traces difficult to debug
-    # '-g3'                                    => leave as much debug info as possible, use '-ggdb3'
-    #                                             for GDB-specific format that has even more info
-    # '-fno-sanitize-recover=all'              => sanitizers should stop execution (which fails the test)
-    #                                             when  triggered, default behavior is to continue
-    # '-fsanitize=undefined,address,leak'      => enable sanitizers
-    # '-Wall -Wextra -Wpedantic -Werror'       => more warnings, treat warnings as errors
-    # see GCC docs: https://gcc.gnu.org/onlinedocs/gcc/Debugging-Options.html
-    #               https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
-    
-    target_link_options(${filename} PRIVATE -fsanitize=undefined,address,leak)
-    # sanitizers are libraries that should be linked, otherwise we would get "undefined reference to function" errors
+    target_compile_features(${target_name} PRIVATE ${GSE_COMPILE_FEATURES} )
+    target_compile_options (${target_name} PRIVATE ${GSE_TEST_FLAGS}       )
+    target_link_options    (${target_name} PRIVATE ${GSE_TEST_LINKER_FLAGS})
+    target_link_libraries  (${target_name} PRIVATE GSE doctest             )
     
     add_test(
-        NAME ${filename}
-        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${filename} --no-intro --no-path-filenames --force-colors
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        # we want relative path to start at the top-level project directory '/',
-        # by default CTest sets working directory to ${CMAKE_CURRENT_BINARY_DIR} which is '/build/tests/'
+        NAME ${target_name}
+        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${target_name} --no-intro --no-path-filenames --force-colors
     )
     
-    # Note:
-    # '--force-colors' makes doctest show colored output in the terminal, but makes up CTest logs save ANSI color
-    # codes. Without this flag doctest suppresses color because it detects CTest writing output to the file.
-    
-endmacro()
+endfunction()
 
-# Tests
-add_gse_test(test_derivative)
-add_gse_test(test_gradient)
-add_gse_test(test_jacobian)
-add_gse_test(test_linear)
-add_gse_test(test_nonlinear)
-add_gse_test(test_ode)
+# Note: '--force-colors' makes doctest show colored output in the terminal, but makes up CTest logs save ANSI
+#       color codes. Without this flag doctest suppresses color because it detects CTest writing output to the file.
+
+gse_add_test("module_derivative")
+gse_add_test("module_gradient")
+gse_add_test("module_jacobian")
+gse_add_test("module_linear")
+gse_add_test("module_nonlinear")
+gse_add_test("module_ode")

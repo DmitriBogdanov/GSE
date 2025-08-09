@@ -1,22 +1,10 @@
-// _______________ TEST FRAMEWORK & MODULE  _______________
+#include "common.hpp"
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "thirdparty/doctest.h"
-
-#include "test.hpp"
-
-#include "GSE/core.hpp"
 #include "GSE/linear.hpp"
 
 // _______________________ INCLUDES _______________________
 
 // None
-
-// ____________________ DEVELOPER DOCS ____________________
-
-// Sanity tests for scalar derivative.
-//
-// Don't necessarily confirm all theoretical properties, but will catch blatant implementation errors.
 
 // ____________________ IMPLEMENTATION ____________________
 

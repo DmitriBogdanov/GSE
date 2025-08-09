@@ -1,22 +1,10 @@
-// _______________ TEST FRAMEWORK & MODULE  _______________
+#include "common.hpp"
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "thirdparty/doctest.h"
-
-#include "test.hpp"
-
-#include "GSE/core.hpp"
 #include "GSE/jacobian.hpp"
 
 // _______________________ INCLUDES _______________________
 
 #include <cmath> // sin(), cols()
-
-// ____________________ DEVELOPER DOCS ____________________
-
-// Sanity tests for vector function jacobian.
-//
-// Don't necessarily confirm all theoretical properties, but will catch blatant implementation errors.
 
 // ____________________ IMPLEMENTATION ____________________
 

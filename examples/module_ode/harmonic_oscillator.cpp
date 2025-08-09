@@ -4,7 +4,10 @@
 #include "GSE/nonlinear.hpp"
 #include "GSE/ode.hpp"
 
-#include "firstparty/UTL.hpp" // JSON, progressbars, etc.
+#include "UTL/json.hpp"
+#include "UTL/time.hpp"
+
+#include <iostream>
 
 // =====================
 // --- Usage Example ---
@@ -17,9 +20,6 @@
 using Scalar = double;
 using Vector = gse::Vector<Scalar, 2>;
 using Matrix = gse::Matrix<Scalar, 2, 2>;
-
-template <class T1, class T2 = float>
-struct TestStruct {};
 
 int main() {
     // ODE Problem (harmonic oscillator equation)
@@ -34,9 +34,9 @@ int main() {
 
     const auto callback = [&](Scalar t, const Vector& y0, const auto& integrator) {
         utl::json::Node step_info;
-        
-        if (t > 5)  {
-            utl::log::println("Solution diverges at t = ", t);
+
+        if (y0.norm() > 1e8) {
+            std::cout << "Solution diverges at t = " << t;
             return gse::ControlFlow::BREAK;
         }
 
@@ -45,14 +45,19 @@ int main() {
         step_info["time_step"] = integrator.time_step;
 
         json["solution"].push_back(std::move(step_info));
-        
+
         return gse::ControlFlow::CONTINUE;
     };
 
     // (optional) Select integrator
-    using custom_ode_method = gse::ode::method::SymplecticEuler<
-        double, gse::nonlinear::method::Newton<double, gse::jacobian::method::CentralDifference<double>,
-                                               gse::linear::method::HouseholderQR>>;
+    using custom_ode_method = gse::ode::method::SymplecticEuler< // stiff ODE solver
+        double,                                                  //
+        gse::nonlinear::method::Newton<                          // underlying non-linear solver
+            double,                                              //
+            gse::jacobian::method::CentralDifference<double>,    // Newton's method differentiation scheme
+            gse::linear::method::HouseholderQR                   // Newton's method linear solver
+            >                                                    //
+        >;                                                       //
 
     custom_ode_method method;
     method.time_step                                  = 1e-3; // ODE method time step
@@ -63,7 +68,7 @@ int main() {
     // Solve for 't' in [0, 10], export results at 100 time layers
     utl::time::Stopwatch watch;
     gse::ode::solve(f, x0, t0, t1, callback, method);
-    utl::log::println(watch.elapsed_string());
+    std::cout << watch.elapsed_string();
 
     json.to_file("temp/harmonic_oscillator.json");
 }

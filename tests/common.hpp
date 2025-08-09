@@ -1,13 +1,20 @@
+// __________________________________ CONTENTS ___________________________________
+//
+//    Common utils / includes / namespaces used for testing.
+//    Reduces test boilerplate, should not be included anywhere else.
+// _______________________________________________________________________________
+
 #pragma once
+
+// ___________________ TEST FRAMEWORK  ____________________
+
+#define DOCTEST_CONFIG_VOID_CAST_EXPRESSIONS // makes 'CHECK_THROWS()' not give warning for discarding [[nodiscard]]
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN   // automatically creates 'main()' that runs tests
+#include "doctest.h"
 
 // _______________________ INCLUDES _______________________
 
-#include "GSE/core.hpp"
-
-// ____________________ DEVELOPER DOCS ____________________
-
-// This is a common include for all tests,
-// it exists purely to reduce boilerplate and shouldn't be included anywhere else.
+#include "GSE/core.hpp" // gse::Extent, gse::Matrix<>
 
 // ____________________ IMPLEMENTATION ____________________
 
