@@ -10,7 +10,11 @@
 !.clang-format
 !.clang-tidy
 !.clangd
-# Whilelist allowed extensions
+# Whitelist dependencies
+!include/GSE/impl/thirdparty/**
+!include/tests/thirdparty/**
+!include/benchmarks/thirdparty/**
+# Whitelist allowed extensions
 # > Code
 !*.h
 !*.hpp
@@ -28,7 +32,7 @@
 # > Data
 !*.json
 
-# Ignore build & temporary directories regarless of their contents
+# Ignore build & temporary directories regardless of their contents
 .cache/
 build/
 temp/

@@ -206,11 +206,11 @@ Solution format:
 
 **Q: What if system size is not known at compile time?**
 
-**A:** Use `gse::Vector<>` instead of `gse::Vector<N>`.
+**A:** Use `gse::Vector<T>` instead of `gse::Vector<T, N>`.
 
 **Q: What if I'm dealing with a stiff system?**
 
-**A:** Use stiff integrators (`ImplicitEuler`, `TrapezoidalRule`, ...).
+**A:** Use stiff integrators (`ImplicitEuler`, `SymplecticEuler`, ...).
 
 **Q: What if I'm dealing with a dynamic system that needs to preserve energy?**
 
@@ -230,11 +230,7 @@ Solution format:
 
 **Q: What if I prefer to use solver with Eigen3 vectors?**
 
-**A:** No problems with that, `gse::Vector<N>` is simply a typedef for `Eigen::Vector<double, N>`. See docs for the [core module]().
-
-**Q: What if I want to use different precision?**
-
-**A:** Precision can be switched globally by defining a policy, see [corresponding guide](./guide_custom_scalar_types.md).
+**A:** No problems with that, `gse::Vector<T, N>` is simply a typedef for `Eigen::Vector<T, N>`. See docs for the [core module](./module_core).
 
 **Q: Is there any good literature on the topic?**
 
@@ -245,11 +241,11 @@ Solution format:
 Below is an example of how to define a 2nd order Runge-Kutta integrator compatible with the library.
 
 ```cpp
-template <gse::Extent N = gse::dynamic_size>
-struct RK2 : gse::ode::integrators::Base<N> {
+template <class T>
+struct RK2 : gse::ode::methods::base::Common<T> {
     
-    template <class Func>
-    void operator()(Func&& f, gse::Scalar& t, gse::Vector<N>& y0) {
+    template <class Func, gse::Extent N>
+    void operator()(Func&& f, T t, gse::Vector<T, N> y0) {
         
         const gse::Vector<N> k1 = f(t, y0);
         const gse::Vector<N> k2 = f(t + this->tau, y0 + this->tau * k1);
