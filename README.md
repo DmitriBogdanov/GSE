@@ -1,6 +1,6 @@
-[<img src ="docs/images/icon_cpp_std_17.svg">](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
-[<img src ="docs/images/icon_license_mit.svg">](./LICENSE.md)
-[<img src ="docs/images/icon_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
+[<img src ="docs/images/badge_cpp_std_17.svg">](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
+[<img src ="docs/images/badge_license_mit.svg">](./LICENSE.md)
+[<img src ="docs/images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 
 # GSE (Generic Solvers for Eigen)
 
