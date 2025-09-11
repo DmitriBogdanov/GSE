@@ -10,30 +10,30 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "GSE/impl/core/traits.hpp"
-#include "GSE/impl/core/types.hpp"
-
-#include "./base.hpp"
+#include "GSE/linear/method.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// <method type>. <method name>.
+// None
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace gse::impl::ode::method {
+namespace gse::linear::methods {
 
-template <class T, /* (!optional) SomeMethod = some::defaults::some_method<T>, ... */>
-struct NewMethod : base::Common<T> {
-    
-    // (!optional)
-    // SomeMethod some_method;
-    // ...
-    
-    template <Extent N, class Func, require_some_function<T, N, Func> = true>
-    /* return_type */ operator()(/* args... */) {
-        
+// [ LSP documentation ]
+//
+// Direct method for solving systems of linear equations.
+// 
+// A good default for most problems.
+//
+template <scalar T, Extent N>
+struct PartialPivotLU {
+
+    Vector<T, N> operator()(const Matrix<T, N, N>& A, const Vector<T, N>& b) {
+        return A.partialPivLu().solve(b);
     }
 };
 
-} // namespace gse::impl::ode::method
+static_assert(method_function<PartialPivotLU<double, dynamic>, double, dynamic>);
+
+} // namespace gse::impl::linear::method

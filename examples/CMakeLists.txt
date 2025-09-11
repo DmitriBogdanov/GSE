@@ -1,8 +1,3 @@
-# Add dependencies
-add_library               (UTL INTERFACE             )
-target_include_directories(UTL INTERFACE "firstparty")
-target_compile_features   (UTL INTERFACE cxx_std_17  )
-
 # Build examples
 function(gse_add_example file_name)
     string(REPLACE "/" "-" target_name "${file_name}") # CMake doesn't like target names with slashes
@@ -13,7 +8,7 @@ function(gse_add_example file_name)
     target_compile_features(${target_name} PRIVATE ${GSE_COMPILE_FEATURES} )
     target_compile_options (${target_name} PRIVATE ${GSE_TEST_FLAGS}       )
     target_link_options    (${target_name} PRIVATE ${GSE_TEST_LINKER_FLAGS})
-    target_link_libraries  (${target_name} PRIVATE GSE UTL                 )
+    target_link_libraries  (${target_name} PRIVATE GSE                     )
     
     add_test(
         NAME ${target_name}
@@ -22,4 +17,4 @@ function(gse_add_example file_name)
     
 endfunction()
 
-gse_add_example("module_ode/harmonic_oscillator")
+gse_add_example("core/test")

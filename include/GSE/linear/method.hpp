@@ -10,30 +10,22 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "GSE/impl/core/traits.hpp"
-#include "GSE/impl/core/types.hpp"
-
-#include "./base.hpp"
+#include "GSE/core/types.hpp"
+#include "GSE/core/concepts.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// <method type>. <method name>.
+// Common constrains & functionality of linear methods.
 
 // ____________________ IMPLEMENTATION ____________________
 
-namespace gse::impl::ode::method {
+namespace gse::linear {
 
-template <class T, /* (!optional) SomeMethod = some::defaults::some_method<T>, ... */>
-struct NewMethod : base::Common<T> {
-    
-    // (!optional)
-    // SomeMethod some_method;
-    // ...
-    
-    template <Extent N, class Func, require_some_function<T, N, Func> = true>
-    /* return_type */ operator()(/* args... */) {
-        
-    }
-};
+// [ LSP documentation ]
+//
+// Concept specifying the signature of a linear method.
+//
+template <class Method, class T, Extent N>
+concept method_function = invocable_r<Method, Vector<T, N>, Matrix<T, N, N>, Vector<T, N>>;
 
-} // namespace gse::impl::ode::method
+} // namespace gse::linear
