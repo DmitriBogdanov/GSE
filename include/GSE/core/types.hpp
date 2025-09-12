@@ -86,7 +86,7 @@ using Vector = Eigen::Vector<T, N>;
 //    `M` - rows extent (static or dynamic).
 //    `N` - columns extent (static or dynamic).
 //
-template <class T= double, Extent M = dynamic, Extent N = dynamic>
+template <class T = double, Extent M = dynamic, Extent N = dynamic>
 using Matrix = Eigen::Matrix<T, N, M>;
 
 } // namespace gse

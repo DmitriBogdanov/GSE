@@ -14,7 +14,7 @@ It also seems to be the only library (that I am aware of) to provide stochastic 
 
 | Subject                                                      | GSE     | **Boost.Odeint**                | **SUNDIALS**        |
 | ------------------------------------------------------------ | ------------------- | ------------------------------- | ------------------- |
-| Installation                                                 | 🟢 Header-only       | 🟡 Header-only with include path | 🔴 CMake             |
+| Installation                                                 | 🟢 Header-only       | 🟢 Header-only | 🟡 CMake             |
 | Project scale                                                | ⚫ Medium **⁽¹⁾**    | ⚫ Large **⁽¹⁾**                 | ⚫ Huge **⁽¹⁾**      |
 | Target use case | ⚫ Research | ⚫ Research & HPC | ⚫ HPC |
 | API complexity                                               | 🟢 Simple **⁽¹⁾**    | 🟡 Simple-to-complex **⁽¹⁾**     | 🔴 Complex **⁽¹⁾**   |

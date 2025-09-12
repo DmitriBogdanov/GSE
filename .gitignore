@@ -10,6 +10,7 @@
 !.clang-tidy
 !.clangd
 !.cppcheck
+!mkdocs.yml
 # > Docs
 !README.md
 !LICENSE.md

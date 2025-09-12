@@ -1,6 +1,6 @@
-[<img src ="docs/images/badge_cpp_std_17.svg">](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
-[<img src ="docs/images/badge_license_mit.svg">](./LICENSE.md)
-[<img src ="docs/images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
+[<img src ="images/badge_cpp_std_17.svg">](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
+[<img src ="images/badge_license_mit.svg">](./LICENSE.md)
+[<img src ="images/badge_header_only.svg">](https://en.wikipedia.org/wiki/Header-only)
 
 # GSE (Generic Solvers for Eigen)
 
@@ -9,15 +9,15 @@
 - Solving [linear systems](https://en.wikipedia.org/wiki/Linear_system)
 - Solving [non-linear systems](https://en.wikipedia.org/wiki/Nonlinear_system)
 - Computing numerical [derivatives](https://en.wikipedia.org/wiki/Numerical_differentiation), [gradients](https://en.wikipedia.org/wiki/Gradient) and [jacobians](https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant)
-- Solving [ordinary differential equations (ODEs)](https://en.wikipedia.org/wiki/Ordinary_differential_equation)
-- Solving [stochastic differential equations (SDEs)](https://en.wikipedia.org/wiki/Stochastic_differential_equation)
+- Solving [ordinary differential equations](https://en.wikipedia.org/wiki/Ordinary_differential_equation)
+- Solving [stochastic differential equations](https://en.wikipedia.org/wiki/Stochastic_differential_equation)
 
 built on top of [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) linear algebra functionality.
 
 The whole library is header-only and can be found [here](include/).
 
 > [!Warning]
-> As of now, the library is in **early alpha**, it contains core functionality, but there is plenty of work left to be done in both implementation and its documentation.
+> As of now, the library is in **early alpha**, it contains core functionality, but there is a lot of work left to be done in both implementation and its documentation.
 
 ## Design Principles
 
@@ -31,7 +31,7 @@ The whole library is header-only and can be found [here](include/).
 
 | Module                                             | Short description                        |
 | -------------------------------------------------- | ---------------------------------------- |
-| [**gse::core**](./docs/module_core.md)             | Core typedefs                            |
+| [**gse::core**](modules/core/types.md)             | Core typedefs                            |
 | [**gse::linear**](./docs/module_linear.md)         | Linear system solvers                    |
 | [**gse::nonlinear**](./docs/module_nonlinear.md)   | Non-linear system solvers                |
 | [**gse::derivative**](./docs/module_derivative.md) | Numerical derivative computation         |
@@ -90,4 +90,4 @@ The library aims to provide good performance for both small & large systems, thi
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/DmitriBogdanov/prototyping_utils/blob/master/LICENSE.md) for details
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) for details

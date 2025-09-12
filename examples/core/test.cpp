@@ -3,6 +3,8 @@
 #include "GSE/linear/solver.hpp"
 
 int main() {
+    gse::Matrix<> x;
+    
     static_assert(gse::linear::method_function<gse::linear::methods::PartialPivotLU<float, 3>, float, 3>);
     
     auto x = gse::init::zero<float, 4>(15);

@@ -1,0 +1,47 @@
+# __________________________________ CONTENTS ___________________________________
+#
+#    This is a meta file for the 'mkdocs-awesome-nav' MkDocs plugin, it allows
+#    us to manually specify navigation structure and order (by default the order
+#    is alphabetic and sections correspond to directories).
+#
+#    It would be nice to use directories as intended, however there is already
+#    plenty of places linking the docs files directly, so we can't move them
+#    without breaking the URLs, so the flat file structure is here to stay.
+# _______________________________________________________________________________
+
+nav:
+  - "Home": README.md
+  - "Getting started":
+    - "Fetching the library"     : getting_started/fetching_the_library.md
+    - "Navigating documentation" : getting_started/navigating_documentation.md
+  - "Usage examples":
+    - "Static & dynamic matrices"  : usage_examples/static_and_dynamic_matrices.md
+    - "Solving a linear system"    : usage_examples/solving_a_linear_system.md
+    - "Solving a nonlinear system" : usage_examples/solving_a_nonlinear_system.md
+    - "Solving an ODE"             : usage_examples/solving_an_ode.md
+    - "Solving an SDE"             : usage_examples/solving_an_sde.md
+    - "Computing derivatives"      : usage_examples/computing_derivatives.md
+  - "API Documentation":
+    - "Core":
+      - "Types"  : api_documentation/core/types.md
+      - "Random" : api_documentation/core/random.md
+    - "ODE":
+      - "Solver" : api_documentation/ode/solver.md
+      - "Method" : api_documentation/ode/method.md
+      - "Methods":
+        - "PartialPivotLU" : module/ode/methods/partial_pivot_lu.md
+        - "FullPivotLU"    : module/ode/methods/full_pivot_lu.md
+        - "QR"             : module/ode/methods/qr.md
+  - "Design choices":
+    - "Total modularity"       : guides/modularity_showcase.md
+    - "Eigen as a backend"     : guides/why_use_eigen_backend.md
+    - "ODE library comparison" : guides/ode_library_differences.md
+  - "Contributing":
+    - "What to contribute" : contributing/what_to_contribute.md
+    - "How to contribute"  : contributing/how_to_contribute.md
+    - "Developer documentation":
+      - "Commenting for LSP" : contributing/developer/callback_flow_control.md
+      - "Passing callables"  : contributing/developer/passing_callables.md
+      - "Flow control"       : contributing/developer/callback_flow_control.md
+      - "File templates"     : contributing/developer/file_templates.md
+  - "License": LICENSE.md
