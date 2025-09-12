@@ -66,6 +66,12 @@ void some_function() {}
 void some_function() {}
 ```
 
+`IntelliSense` on the other hand preserves line breaks & spacing in a sensible way, so we use what works with `clangd` and `IntelliSense` will be always compatible.
+
+### Comments above macros
+
+`clangd` doesn't support LSP comments for macros nothing we can do about it. `IntelliSense` works fine.
+
 ## Comment guidelines
 
 All public API has to provide LSP comments with the following format:
@@ -78,13 +84,3 @@ All public API has to provide LSP comments with the following format:
 ```
 
 This somewhat increases code verbosity, but results in a rather nice LSP result. Some codebases use Doxygen comments for the same purpose, however their format is not as readable.
-
-### Function
-
-### Class
-
-### Typedef
-
-### Concept
-
-### Constant

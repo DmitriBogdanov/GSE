@@ -73,20 +73,20 @@ constexpr Extent dynamic = Eigen::Dynamic;
 // [ LSP documentation ]
 //
 // Row-major column vector. Templated on:
-//    'T' - scalar type,
-//    'N' - rows extent (static or dynamic).
+//    `T` - scalar type,
+//    `N` - rows extent (static or dynamic).
 //
-template <class T, Extent N = dynamic>
+template <class T = double, Extent N = dynamic>
 using Vector = Eigen::Vector<T, N>;
 
 // [ LSP documentation ]
 //
 // Row-major matrix. Templated on:
-//    'T' - scalar type,
-//    'M' - rows extent (static or dynamic).
-//    'N' - columns extent (static or dynamic).
+//    `T` - scalar type,
+//    `M` - rows extent (static or dynamic).
+//    `N` - columns extent (static or dynamic).
 //
-template <class T, Extent M = dynamic, Extent N = dynamic>
+template <class T= double, Extent M = dynamic, Extent N = dynamic>
 using Matrix = Eigen::Matrix<T, N, M>;
 
 } // namespace gse

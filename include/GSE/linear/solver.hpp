@@ -41,7 +41,9 @@ namespace defaults {
 
 // [ LSP documentation ]
 //
-// Default method for solving square linear systems.
+// Default method for solving square linear systems. Templated on:
+//    `T` - scalar type,
+//    `N` - system extent (static or dynamic).
 //
 template <scalar T, Extent N>
 using method = methods::PartialPivotLU<T, N>;
@@ -55,12 +57,12 @@ using method = methods::PartialPivotLU<T, N>;
 // [ LSP documentation ]
 //
 // Solves linear system:
-//    A x = b,   A - NxN, b - Nx1.
+//    `A x = b,   A - NxN, b - Nx1.`
 //
 // where:
-//    'A'      - system matrix,
-//    'b'      - system RHS,
-//    'method' - linear method.
+//    `A`      - system matrix,
+//    `b`      - system RHS,
+//    `method` - linear method.
 //
 template <scalar T, Extent N, method_function<T, N> Method = defaults::method<T, N>>
 Vector<T, N> solve(const Matrix<T, N, N>& A, const Vector<T, N>& b, Method&& method = Method{}) {

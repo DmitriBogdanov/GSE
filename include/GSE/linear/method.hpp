@@ -10,7 +10,6 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "GSE/core/types.hpp"
 #include "GSE/core/concepts.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
@@ -23,7 +22,8 @@ namespace gse::linear {
 
 // [ LSP documentation ]
 //
-// Concept specifying the signature of a linear method.
+// Concept that constrains `Method` to a signature of a linear method:
+//    `Vector<T, N> ( Matrix<T, N, N>, Vector<T, N> )`
 //
 template <class Method, class T, Extent N>
 concept method_function = invocable_r<Method, Vector<T, N>, Matrix<T, N, N>, Vector<T, N>>;

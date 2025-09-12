@@ -1,40 +1,34 @@
 # Ignore everything
 *
 
-# Whitelist directories
-!*/
-# Whitelist git config
+# Whitelist
+# > Git config
 !.gitignore
 !.gitattributes
-# Whitelist toolchain configuration files
+# > Toolchain config
 !.clang-format
 !.clang-tidy
 !.clangd
-# Whitelist dependencies
-!include/GSE/impl/thirdparty/**
-!include/tests/thirdparty/**
-!include/benchmarks/thirdparty/**
-# Whitelist allowed extensions
-# > Code
-!*.h
-!*.hpp
-!*.c
-!*.cpp
-# > Scripts
-!*.txt
-!*.sh
-!*.wls
+!.cppcheck
 # > Docs
-!*.md
-!*.svg
-!*.jpg
-!*.png
-# > Data
-!*.json
-
-# Ignore build & temporary directories regardless of their contents
-.cache/
-build/
-temp/
-snippets/
-scripts/report/
+!README.md
+!LICENSE.md
+!CONTRIBUTING.md
+!docs/
+!docs/**
+# > Build
+!CMakePresets.json
+!CMakeLists.txt
+# > Scripts
+!actions.sh
+!bash/
+!bash/**
+# > Code
+!include/
+!include/**
+!tests/
+!tests/**
+!examples/
+!examples/**
+!benchmarks/
+!benchmarks/**
