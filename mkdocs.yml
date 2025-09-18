@@ -46,8 +46,11 @@ markdown_extensions:
 extra_javascript:
   - mkdocs/mathjax.js                                # standard Mathjax includes
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js #
+  - mkdocs/modification/code_nav_titles.js           # makes fully lowercase navigation titles render as code
   - mkdocs/modification/header_title.js              # sets header title separately from site name
   - mkdocs/modification/relative_links.js            # adjusts relative links to work with the website
+
+# Note: Script order matters, nav titles should be replaced before adding the custom header. 
 
 # =========================
 # --- Style & structure ---
@@ -112,3 +115,4 @@ copyright: "Copyright &copy; 2025 Dmitri Bogdanov"
 extra_css:
   - mkdocs/callouts.css # fix for 'markdown-callouts' plugin missing the style for '[!Important]'
   - mkdocs/width.css    # makes page content wide on large screens
+  - mkdocs/modification/code_nav_titles.css

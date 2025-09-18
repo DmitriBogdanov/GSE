@@ -2,7 +2,7 @@
 
 ## Matrix types
 
-GSE matrices work as simple typedefs for matrices from Eigen:
+GSE matrices work as simple typedefs for [Eigen](https://en.wikipedia.org/wiki/Eigen_(C%2B%2B_library)) matrices:
 
 ```cpp
 template <class T = double, Extent N = dynamic>

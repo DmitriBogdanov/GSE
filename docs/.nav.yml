@@ -22,16 +22,20 @@ nav:
     - "Solving an SDE"             : usage_examples/solving_an_sde.md
     - "Computing derivatives"      : usage_examples/computing_derivatives.md
   - "API Documentation":
-    - "Core":
-      - "Types"  : api_documentation/core/types.md
-      - "Random" : api_documentation/core/random.md
-    - "ODE":
-      - "Solver" : api_documentation/ode/solver.md
-      - "Method" : api_documentation/ode/method.md
-      - "Methods":
-        - "PartialPivotLU" : module/ode/methods/partial_pivot_lu.md
-        - "FullPivotLU"    : module/ode/methods/full_pivot_lu.md
-        - "QR"             : module/ode/methods/qr.md
+    - "core/":
+      - "types.hpp"      : api_documentation/core/types.md
+      - "concepts.hpp"   : api_documentation/core/concepts.md
+      - "initialize.hpp" : api_documentation/core/initialize.md
+      - "random.hpp"     : api_documentation/core/random.md
+      - "utility.hpp"    : api_documentation/core/utility.md
+      - "version.hpp"    : api_documentation/core/version.md
+    - "ode/":
+      - "solver.hpp" : api_documentation/ode/solver.md
+      - "method.hpp" : api_documentation/ode/method.md
+      - "methods/":
+        - "partial_pivot_lu.hpp" : module/ode/methods/partial_pivot_lu.md
+        - "full_pivot_lu.hpp"    : module/ode/methods/full_pivot_lu.md
+        - "qr.hpp"             : module/ode/methods/qr.md
   - "Design choices":
     - "Total modularity"       : guides/modularity_showcase.md
     - "Eigen as a backend"     : guides/why_use_eigen_backend.md

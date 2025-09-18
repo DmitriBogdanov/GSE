@@ -665,6 +665,10 @@ public:
     constexpr bool operator!=(const NormalDistribution& other) noexcept { return !(*this == other); }
 };
 
+// ==================
+// --- Convenience --
+// ==================
+
 // [ LSP documentation ]
 //
 // Typedef that automatically selects `UniformIntDistribution<T>` or `UniformRealDistribution<T>` based on `T`.

@@ -1,4 +1,4 @@
-*[Extent]: Extents specify dimensions of the matrix which are known at compile time. Dimensions without compile time value are set to `gse::dynamic`.
+*[QoL]: Quality of Life.
 
 *[RHS]: Right-Hand Side
 
