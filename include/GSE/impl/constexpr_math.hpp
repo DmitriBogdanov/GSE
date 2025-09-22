@@ -70,3 +70,14 @@ template <std::size_t n, scalar T>
 }
 
 } // namespace gse::impl
+
+/*!
+	\brief Some kind of class.
+
+	This class does:
+    - thing 1
+    - thing 2
+    - thing 3
+*/
+struct MyClass1 {
+};

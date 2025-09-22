@@ -10,7 +10,7 @@
 
 // _______________________ INCLUDES _______________________
 
-#include "GSE/core/init.hpp"
+#include "GSE/core/initialize.hpp"
 #include "GSE/jacobian/method.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
@@ -23,14 +23,14 @@ namespace gse::jacobian::methods {
 
 // [ LSP documentation ]
 //
-// Direct method for solving systems of linear equations.
+// 2nd order numerical differentiation method.
 //
 // A good default for most problems.
 //
-template <scalar T, Extent N>
+template <scalar T>
 struct CentralDifference : impl::CentralScheme<T> {
 
-    template <vector_function<T, N> Func>
+    template <Extent N, vector_function<T, N> Func>
     Matrix<T, N, N> operator()(Func&& f, const Vector<T, N>& x) {
         const T h = this->diff_step;
 
@@ -61,7 +61,7 @@ struct CentralDifference : impl::CentralScheme<T> {
     }
 };
 
-static_assert(method_function<CentralDifference<double, dynamic>, decltype([](Vector<>) { return Vector<>{}; }), double,
-                              dynamic>);
+static_assert(
+    method_function<CentralDifference<double>, decltype([](Vector<>) { return Vector<>{}; }), double, dynamic>);
 
 } // namespace gse::jacobian::methods

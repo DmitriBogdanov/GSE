@@ -72,6 +72,10 @@ void some_function() {}
 
 `clangd` doesn't support LSP comments for macros nothing we can do about it. `IntelliSense` works fine.
 
+## Why not use doxygen comments
+
+Doxygen comments require special support from the LSP in order to look readable. `IntelliSense` provides such support, `clangd` currently doesn't. Using the rules below the comments end up looking good regardless of LSP.
+
 ## Comment guidelines
 
 All public API has to provide LSP comments with the following format:

@@ -11,7 +11,7 @@
 // _______________________ INCLUDES _______________________
 
 #include "GSE/core/concepts.hpp"
-#include "GSE/core/constexpr_math.hpp"
+#include "GSE/impl/constexpr_math.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 

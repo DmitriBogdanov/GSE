@@ -14,17 +14,15 @@
 
 // ____________________ DEVELOPER DOCS ____________________
 
-// Callback control flow enum for callback, needed to break early from iterative methods.
-//
-// Full explanation can be found in 'docs/dev_callback_control_flow.md'.
+// See 'docs/dev_callback_control_flow.md'.
 
 // ____________________ IMPLEMENTATION ____________________
 
-// ==========================
-// --- Core functionality ---
-// ==========================
-
 namespace gse {
+
+// ====================
+// --- Control flow ---
+// ====================
 
 // [ LSP documentation ]
 //

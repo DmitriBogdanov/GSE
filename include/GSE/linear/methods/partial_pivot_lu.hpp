@@ -23,17 +23,17 @@ namespace gse::linear::methods {
 // [ LSP documentation ]
 //
 // Direct method for solving systems of linear equations.
-// 
+//
 // A good default for most problems.
 //
-template <scalar T, Extent N>
 struct PartialPivotLU {
 
+    template <scalar T, Extent N>
     Vector<T, N> operator()(const Matrix<T, N, N>& A, const Vector<T, N>& b) {
         return A.partialPivLu().solve(b);
     }
 };
 
-static_assert(method_function<PartialPivotLU<double, dynamic>, double, dynamic>);
+static_assert(method_function<PartialPivotLU, double, dynamic>);
 
-} // namespace gse::impl::linear::method
+} // namespace gse::linear::methods
