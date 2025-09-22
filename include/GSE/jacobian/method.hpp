@@ -12,6 +12,7 @@
 
 #include "GSE/core/concepts.hpp"
 #include "GSE/impl/constexpr_math.hpp"
+#include "GSE/impl/prototypes.hpp"
 
 // ____________________ DEVELOPER DOCS ____________________
 
@@ -24,12 +25,10 @@ namespace gse::jacobian {
 // [ LSP documentation ]
 //
 // Concept that constrains `Method` to a signature of a jacobian method:
-//    `Matrix<T, N> ( Func, Vector<T, N> )`
+//    `Matrix<T, N> ( VectorFunction, Vector<T, N> )`
 //
-// where `Func` is a vector function.
-//
-template <class Method, class Func, class T, Extent N>
-concept method_function = invocable_r<Method, Matrix<T, N>, Func, Vector<T, N>> && vector_function<Func, T, N>;
+template <class Method, class T, Extent N>
+concept method_function = invocable_r<Method, Matrix<T, N>, impl::prototypes::VectorFunction<T, N>, Vector<T, N>>;
 
 } // namespace gse::jacobian
 

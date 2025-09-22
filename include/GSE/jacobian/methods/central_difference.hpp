@@ -61,7 +61,6 @@ struct CentralDifference : impl::CentralScheme<T> {
     }
 };
 
-static_assert(
-    method_function<CentralDifference<double>, decltype([](Vector<>) { return Vector<>{}; }), double, dynamic>);
+static_assert(method_function<CentralDifference<double>, double, dynamic>);
 
 } // namespace gse::jacobian::methods

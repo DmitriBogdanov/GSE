@@ -50,7 +50,7 @@ using method = methods::CentralDifference<T>;
 //    `x`      - evaluation point,
 //    `method` - numerical differentiation method.
 //
-template <scalar T, Extent N, vector_function<T, N> Func, method_function<Func, T, N> Method = defaults::method<T>>
+template <scalar T, Extent N, vector_function<T, N> Func, method_function<T, N> Method = defaults::method<T>>
 Matrix<T, N, N> solve(Func&& f, const Vector<T, N>& x, Method&& method = Method{}) {
     return method(f, x);
 }

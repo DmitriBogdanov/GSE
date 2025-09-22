@@ -44,6 +44,12 @@ template <scalar T>
 }
 
 template <scalar T>
+[[nodiscard]] constexpr T sqr(T x) noexcept { return x * x; }
+
+template <scalar T>
+[[nodiscard]] constexpr T cube(T x) noexcept { return x * x * x; }
+
+template <scalar T>
 [[nodiscard]] constexpr bool approx_equals(T x, T y) noexcept {
     return abs(x - y) <= std::numeric_limits<T>::epsilon();
 }
@@ -69,15 +75,14 @@ template <std::size_t n, scalar T>
     return approx_equals(r0, r) ? r0 : root<n>(x, r);
 }
 
+template <scalar T>
+[[nodiscard]] constexpr T sqrt(T x) noexcept {
+    return root<2>(x);
+}
+
+template <scalar T>
+[[nodiscard]] constexpr T cbrt(T x) noexcept {
+    return root<3>(x);
+}
+
 } // namespace gse::impl
-
-/*!
-	\brief Some kind of class.
-
-	This class does:
-    - thing 1
-    - thing 2
-    - thing 3
-*/
-struct MyClass1 {
-};
