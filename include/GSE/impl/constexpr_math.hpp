@@ -44,10 +44,14 @@ template <scalar T>
 }
 
 template <scalar T>
-[[nodiscard]] constexpr T sqr(T x) noexcept { return x * x; }
+[[nodiscard]] constexpr T sqr(T x) noexcept {
+    return x * x;
+}
 
 template <scalar T>
-[[nodiscard]] constexpr T cube(T x) noexcept { return x * x * x; }
+[[nodiscard]] constexpr T cube(T x) noexcept {
+    return x * x * x;
+}
 
 template <scalar T>
 [[nodiscard]] constexpr bool approx_equals(T x, T y) noexcept {
@@ -71,7 +75,7 @@ template <scalar T>
 template <std::size_t n, scalar T>
 [[nodiscard]] constexpr T root(T x, T r0 = T(1)) noexcept {
     const T r = r0 - (pow(r0, n) - x) / (T(n) * pow(r0, n - 1));
-    
+
     return approx_equals(r0, r) ? r0 : root<n>(x, r);
 }
 

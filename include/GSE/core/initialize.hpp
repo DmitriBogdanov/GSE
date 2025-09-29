@@ -139,10 +139,10 @@ template <scalar T = double, Extent N = dynamic, Extent M = dynamic>
 //
 // Creates a `Vector<T, N>` with `rows` elements filled with random values from `dist` generated with `gen`.
 //
-// For static `N`, parameter `rows` should correspond to the static value.
+// For static `N`, parameter `rows` is optional.
 //
 template <scalar T = double, Extent N = dynamic, random_distribution Dist = UniformDistribution<T>,
-          random_number_generator Gen = PRNG>
+          random_number_generator Gen = PRNG, impl::require_dynamic<N> = true>
 [[nodiscard]] Vector<T, N> random(Idx rows, Dist&& dist = Dist{}, Gen&& gen = Gen{}) {
     // By passing distribution & PRNG this way we make function more semantically explicit than Eigen's default API:
     //    > random(17, 0, 1);                                 // what kind of distribution do we have?
@@ -159,6 +159,23 @@ template <scalar T = double, Extent N = dynamic, random_distribution Dist = Unif
     return res;
 }
 
+// [ LSP documentation ]
+//
+// Creates a `Vector<T, N>` with `rows` elements filled with random values from `dist` generated with `gen`.
+//
+// For static `N`, parameter `rows` is optional.
+//
+template <scalar T = double, Extent N = dynamic, random_distribution Dist = UniformDistribution<T>,
+          random_number_generator Gen = PRNG, impl::require_static<N> = true>
+[[nodiscard]] Vector<T, N> random(Idx rows = N, Dist&& dist = Dist{}, Gen&& gen = Gen{}) {
+    assert(N == rows);
+    assert(rows >= 0);
+
+    Vector<T, N> res = zero<T, N>(rows);
+    for (auto& e : res) e = dist(gen);
+    return res;
+}
+
 // =====================
 // --- Random matrix ---
 // =====================
@@ -167,13 +184,36 @@ template <scalar T = double, Extent N = dynamic, random_distribution Dist = Unif
 //
 // Creates a `Matrix<T, N, M>` with `rows` x `cols` elements filled with random values from `dist` generated with `gen`.
 //
-// For static `N` / `M`, parameters `rows` / `cols` should correspond to the static value.
+// For static `N` / `M`, parameters `rows` / `cols` are optional.
 //
 template <scalar T = double, Extent N = dynamic, Extent M = dynamic, random_distribution Dist = UniformDistribution<T>,
-          random_number_generator Gen = PRNG>
+          random_number_generator Gen = PRNG, impl::require_dynamic_matrix<N, M> = true>
 [[nodiscard]] Matrix<T, N, M> random(Idx rows, Idx cols, Dist&& dist = Dist{}, Gen&& gen = Gen{}) {
     assert(N == dynamic || N == rows);
     assert(M == dynamic || M == cols);
+    assert(rows >= 0);
+    assert(cols >= 0);
+
+    Matrix<T, N, M> res = zero<T, N, M>(rows, cols);
+
+    for (auto& e : res.reshaped()) e = dist(gen);
+    // Eigen matrices do not provide iterators, but Eigen vectors do, to do a range-based
+    // loop over a matrix we can use reshaped view and treat it like a vector
+
+    return res;
+}
+
+// [ LSP documentation ]
+//
+// Creates a `Matrix<T, N, M>` with `rows` x `cols` elements filled with random values from `dist` generated with `gen`.
+//
+// For static `N` / `M`, parameters `rows` / `cols` are optional.
+//
+template <scalar T = double, Extent N = dynamic, Extent M = dynamic, random_distribution Dist = UniformDistribution<T>,
+          random_number_generator Gen = PRNG, impl::require_static_matrix<N, M> = true>
+[[nodiscard]] Matrix<T, N, M> random(Idx rows = N, Idx cols = M, Dist&& dist = Dist{}, Gen&& gen = Gen{}) {
+    assert(N == rows);
+    assert(M == cols);
     assert(rows >= 0);
     assert(cols >= 0);
 
